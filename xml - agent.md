@@ -1818,7 +1818,8 @@
 
 ```json
 {
-"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.SysCabinetLogDetailMapper">\n\n\n <!--Query using an entity as the filter criteria-->\n <select id="findList" resultType="com.gds.jpi.dcim.vo.CabinetLogDetailVo">\n SELECT\n detail.id,\n detail.log_id,\n detail.field_code,\n mapping.name AS field_name,\n detail.before,\n detail.after,\n mapping.is_show\n FROM cbms.sys_cabinet_log_detail detail\n LEFT JOIN cbms.sys_field_mapping mapping ON detail.field_code = mapping.code AND mapping.biz_belong = 'CABINET'\n <where>\n <if test="logId != null">\n AND detail.log_id = #{logId}\n </if>\n <if test="logIds != null and logIds.size() > 0">\n AND detail.log_id IN\n <foreach collection="logIds" open="(" close=")" separator="," item="item">\n #{item}\n </foreach>\n </if>\n </where>\n </select>\n\n</mapper>", "details": [
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.SysCabinetLogDetailMapper">\n\n\n <!--Query using an entity as the filter criteria-->\n <select id="findList" resultType="com.gds.jpi.dcim.vo.CabinetLogDetailVo">\n SELECT\n detail.id,\n detail.log_id,\n detail.field_code,\n mapping.name AS field_name,\n detail.before,\n detail.after,\n mapping.is_show\n FROM cbms.sys_cabinet_log_detail detail\n LEFT JOIN cbms.sys_field_mapping mapping ON detail.field_code = mapping.code AND mapping.biz_belong = 'CABINET'\n <where>\n <if test="logId != null">\n AND detail.log_id = #{logId}\n </if>\n <if test="logIds != null and logIds.size() > 0">\n AND detail.log_id IN\n <foreach collection="logIds" open="(" close=")" separator="," item="item">\n #{item}\n </foreach>\n </if>\n </where>\n </select>\n\n</mapper>",
+"details": [
     {
       "lineNumber": 5,
       "lineType": "comment",
@@ -1826,7 +1827,7 @@
       "originalText": "通过实体作为筛选条件查询",
       "translatedText": "Query using an entity as the filter criteria"
     }
-  ]
+    ]
 }
 ```
 ### DEMOS7
