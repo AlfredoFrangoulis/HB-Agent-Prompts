@@ -24,5 +24,4 @@
 - [x] XML
 - [ ] YML - ON PROGRESS 🚨
 - [ ] SQL
-- [ ] PROPERTIES
 - [ ] VUE
