@@ -25,3 +25,4 @@
 - [ ] YML - ON PROGRESS 🚨
 - [ ] SQL - ON PROGRESS 🚨
 - [ ] VUE - ON PROGRESS 🚨
+- [ ] Chinese Logic Agent Training Prompts 💀
