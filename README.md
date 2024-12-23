@@ -12,6 +12,7 @@
 - BACKEND 
   - HZERO
 - FRONTEND
+  - https://hive-bridge.vercel.app/
   - NEXT JS (*TEMPORARY FOR DEVELOPMENT*)
 
 
