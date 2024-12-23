@@ -23,5 +23,5 @@
 - [x] TS / JS / ECMASCRIPT
 - [x] XML
 - [ ] YML - ON PROGRESS 🚨
-- [ ] SQL
-- [ ] VUE
+- [ ] SQL - ON PROGRESS 🚨
+- [ ] VUE - ON PROGRESS 🚨
