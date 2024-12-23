@@ -2875,9 +2875,10 @@
 
 ```json
 {
-"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.alarmhandlercenter.mapper.AlarmEsSyncFailureMapper">\n    <insert id="replaceSyncLog">\n        REPLACE INTO\n            dcim.alarm_es_sync_failure (alarm_id, create_time)\n        VALUES\n        <foreach collection="alarmIds" item="alarmId" separator=",">\n            (#{alarmId}, NOW())\n        </foreach>\n    </insert>\n    <delete id="clearAlarmAct">\n        DELETE\n            a.*\n        FROM\n            dcim.alarm_act a\n        LEFT JOIN\n            dcim.alarm_es_sync_failure f ON f.alarm_id = a.id\n        WHERE\n            (a.recover_flag = 1 OR a.event_type_id = 2)\n            AND a.confirm_flag = 1\n            AND f.alarm_id IS NULL\n            AND a.update_time &lt; #{time}\n    </delete>\n</mapper>",
-"details": []
+  "translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace=\"com.gds.jpi.dcim.core.alarmhandlercenter.mapper.AlarmEsSyncFailureMapper\">\n    <insert id=\"replaceSyncLog\">\n        REPLACE INTO\n            dcim.alarm_es_sync_failure (alarm_id, create_time)\n        VALUES\n        <foreach collection=\"alarmIds\" item=\"alarmId\" separator=\",\" >\n            (#{alarmId}, NOW())\n        </foreach>\n    </insert>\n    <delete id=\"clearAlarmAct\">\n        DELETE\n            a.*\n        FROM\n            dcim.alarm_act a\n        LEFT JOIN\n            dcim.alarm_es_sync_failure f ON f.alarm_id = a.id\n        WHERE\n            (a.recover_flag = 1 OR a.event_type_id = 2)\n            AND a.confirm_flag = 1\n            AND f.alarm_id IS NULL\n            AND a.update_time &lt; #{time}\n    </delete>\n</mapper>",
+  "details": []
 }
+
 ```
 
 ### DEMOS9
