@@ -6,6 +6,8 @@
 
 - LLM
   - https://docs.mistral.ai/
+    - Using Agent
+    - Model: `pixtral-large-2411`
   - (_MAYBE USING OPEN AI OR ANTHROPIC FOR PRODUCTION_)
 - BACKEND
   - HZERO
