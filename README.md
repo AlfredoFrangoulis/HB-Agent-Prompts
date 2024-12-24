@@ -42,4 +42,6 @@
 ## KNOWN ISSUE
 
 - If the LLM returned the response as code block (using backticks ```) it'll got stored too
-  - Current solution — Sanitized the string
+  - Current solution 
+    - Add prompt condition — e.g. `Ensure the line numbers in "details" align exactly with the original input file (do not add new line). Do not include markdown formatting (e.g., ```json) in the response. Return the JSON as plain text.`
+    -  Sanitized the string
