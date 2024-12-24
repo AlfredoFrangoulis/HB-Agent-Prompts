@@ -1,21 +1,17 @@
 # HIVE BRIDGE AI TRANSLATOR
 
-> ## **`📢❗🚨 57.14285714285714% DONE IKUZOOOOO 🚨📢❗`** 
-
-
+> ## **`📢❗🚨 57.14285714285714% DONE IKUZOOOOO 🚨📢❗`**
 
 ## Tech Stack
 
 - LLM
-  - https://docs.mistral.ai/ 
-  - (*MAYBE USING OPEN AI OR ANTHROPIC FOR PRODUCTION*)
-- BACKEND 
+  - https://docs.mistral.ai/
+  - (_MAYBE USING OPEN AI OR ANTHROPIC FOR PRODUCTION_)
+- BACKEND
   - HZERO
 - FRONTEND
   - https://hive-bridge.vercel.app/
-  - NEXT JS (*TEMPORARY FOR DEVELOPMENT*)
-
-
+  - NEXT JS (_TEMPORARY FOR DEVELOPMENT_)
 
 ## TODO
 
@@ -31,10 +27,8 @@
 
 ### BACKEND
 
-- [ ] Agent Table to store agent (CRUD) - ON PROGRESS 🚨
+- [x] Agent Table to store agent (CRUD)
 - [ ] FIX LOGIC FLOW (Move the translation request to the frontend) ((FOR PROD 💀))
-
-
 
 ### FRONTEND
 
