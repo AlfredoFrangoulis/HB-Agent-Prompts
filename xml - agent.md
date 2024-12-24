@@ -3200,3 +3200,1033 @@ Keep entities like &gt;, &lt;, &amp;, &lt;=, &gt;= and symbols such as backticks
 ]
 }
 ```
+
+### DEMOS12
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.RecordCabinetDailyMapper">
+    <insert id="insertBatch" keyProperty="list.id" useGeneratedKeys="true" parameterType="java.util.ArrayList">
+        INSERT INTO dcim.record_cabinet_daily_${dcId}
+        (overview_id, collect_time,cabinet_id,cabinet_name,
+        room_id,room_name,project_code,cntrct_elec_kva,elect_status,attr_cnt,
+        a_customer_id,a_customer_name,end_customer_id,end_customer_name,
+        original_power_kw,original_power_kwh,original_power_kw_increment_ratio,original_power_kwh_increment_ratio,
+        yesterday_power_kw,yesterday_power_kwh,first_power_kwh,last_power_kwh)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.overviewId}, #{item.collectTime}, #{item.cabinetId}, #{item.cabinetName},
+            #{item.roomId}, #{item.roomName}, #{item.projectCode}, #{item.cntrctElecKva}, #{item.electStatus},
+            #{item.attrCnt},
+            #{item.aCustomerId}, #{item.aCustomerName}, #{item.endCustomerId}, #{item.endCustomerName},
+            #{item.originalPowerKw}, #{item.originalPowerKwh},
+            #{item.originalPowerKwIncrementRatio},#{item.originalPowerKwhIncrementRatio},
+            #{item.yesterdayPowerKw}, #{item.yesterdayPowerKwh}, #{item.firstPowerKwh}, #{item.lastPowerKwh})
+        </foreach>
+    </insert>
+    <update id="fillConfirmValue">
+        UPDATE
+            dcim.record_cabinet_daily_${dcId}
+        SET confirm_power_kw                  = IFNULL(fixed_power_kw, original_power_kw),
+            confirm_power_kwh                 = IFNULL(fixed_power_kwh, original_power_kwh),
+            confirm_power_kw_increment_ratio  = IFNULL(fixed_power_kw_increment_ratio,
+                                                       original_power_kw_increment_ratio),
+            confirm_power_kwh_increment_ratio = IFNULL(fixed_power_kwh_increment_ratio,
+                                                       original_power_kwh_increment_ratio)
+        WHERE overview_id = #{overviewId}
+    </update>
+    <update id="fillKwConfirmValue">
+        UPDATE
+            dcim.record_cabinet_daily_${dcId}
+        SET confirm_power_kw                  = IFNULL(fixed_power_kw, original_power_kw),
+            confirm_power_kw_increment_ratio  = IFNULL(fixed_power_kw_increment_ratio,
+                                                       original_power_kw_increment_ratio)
+        WHERE confirm_power_kw is null AND #{endTime} > collect_time
+    </update>
+    <update id="fillKwhConfirmValue">
+        UPDATE
+            dcim.record_cabinet_daily_${dcId}
+        SET confirm_power_kwh                  = IFNULL(fixed_power_kwh, original_power_kwh),
+            confirm_power_kwh_increment_ratio  = IFNULL(fixed_power_kwh_increment_ratio,
+                                                        original_power_kwh_increment_ratio)
+        WHERE confirm_power_kwh is null AND #{endTime} > collect_time
+    </update>
+    <select id="fetchRecordsByIds" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">
+        SELECT
+            id,
+            overview_id,
+            collect_time,
+            cabinet_id,
+            attr_cnt,
+            original_power_kw,
+            original_power_kwh,
+            fixed_power_kw,
+            fixed_power_kwh,
+            yesterday_power_kw,
+            yesterday_power_kwh,
+            abnormal_flag,
+            update_flag,
+            fixed_flag
+        FROM
+            dcim.record_cabinet_daily_${dcId}
+        WHERE
+            id IN
+        <foreach collection="recordIds" item="recordId" open="(" close=")" separator=",">
+            #{recordId}
+        </foreach>
+    </select>
+    <update id="updateRecord">
+        UPDATE
+            dcim.record_cabinet_daily_${dcId}
+        SET
+        <if test="newRecord.fixedPowerKw != null">
+            fixed_power_kw = #{newRecord.fixedPowerKw},
+        </if>
+        <if test="newRecord.fixedPowerKwh != null">
+            fixed_power_kwh = #{newRecord.fixedPowerKwh},
+        </if>
+        <if test="newRecord.fixedPowerKwIncrementRatio != null">
+            fixed_power_kw_increment_ratio = #{newRecord.fixedPowerKwIncrementRatio},
+        </if>
+        <if test="newRecord.fixedPowerKwhIncrementRatio != null">
+            fixed_power_kwh_increment_ratio = #{newRecord.fixedPowerKwhIncrementRatio},
+        </if>
+        <if test="newRecord.fixedFlag != null">
+            fixed_flag = #{newRecord.fixedFlag},
+        </if>
+            update_flag = #{newRecord.updateFlag},
+            update_time = now()
+        WHERE
+            id = #{newRecord.id}
+    </update>
+    <update id="updateRecordByPower">
+        UPDATE
+            dcim.record_cabinet_daily_${dcId}
+        SET
+            fixed_power_kwh = ROUND(IFNULL(fixed_power_kw, original_power_kw) * 24, 2),
+            fixed_power_kwh_increment_ratio = IF(yesterday_power_kwh = 0, null,
+                ROUND((IFNULL(fixed_power_kw, original_power_kw) * 24 - yesterday_power_kwh) / yesterday_power_kwh, 4)
+            ),
+            update_flag = (update_flag | 2),
+            update_time = now()
+        WHERE
+            id IN
+        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">
+            #{recordId}
+        </foreach>
+    </update>
+    <update id="updateRecordByPowerConsumption">
+        UPDATE
+            dcim.record_cabinet_daily_${dcId}
+        SET
+            fixed_power_kw = ROUND(IFNULL(fixed_power_kwh, original_power_kwh) / 24, 2),
+            fixed_power_kw_increment_ratio = IF(yesterday_power_kw = 0, null,
+                ROUND((IFNULL(fixed_power_kwh, original_power_kwh) / 24 - yesterday_power_kw) / yesterday_power_kw, 4)
+            ),
+            update_flag = (update_flag | 1),
+            update_time = now()
+        WHERE
+            id IN
+        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">
+            #{recordId}
+        </foreach>
+    </update>
+    <update id="updateRecordToZero">
+        UPDATE
+            dcim.record_cabinet_daily_${dcId}
+        SET
+            fixed_power_kw = 0,
+        fixed_power_kwh = 0,
+        fixed_power_kw_increment_ratio = IF(yesterday_power_kw = 0, null,
+        ROUND((0 - yesterday_power_kw) / yesterday_power_kw, 4)
+        ),
+        fixed_power_kwh_increment_ratio = IF(yesterday_power_kwh = 0, null,
+        ROUND((0 - yesterday_power_kwh) / yesterday_power_kwh, 4)
+        ),
+        update_flag = (update_flag | 3),
+        update_time = now()
+        WHERE
+        id IN
+        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">
+            #{recordId}
+        </foreach>
+    </update>
+    <update id="updateFixedFlagByIds">
+        UPDATE
+            dcim.record_cabinet_daily_${dcId}
+        SET
+            fixed_flag = 1
+        WHERE
+            id IN
+        <foreach collection="fixedIds" item="fixedId" open="(" separator="," close=")">
+            #{fixedId}
+        </foreach>
+    </update>
+
+    <update id="updateRecordAbnormalFlag">
+        UPDATE
+        dcim.record_cabinet_daily_${dcId}
+        SET
+        abnormal_flag = 1,
+        fixed_flag = 0,
+        update_flag = 0,
+        fixed_power_kw_increment_ratio = null ,
+        fixed_power_kwh_increment_ratio = null ,
+        confirm_power_kw = null ,
+        confirm_power_kwh = null ,
+        confirm_power_kw_increment_ratio = null ,
+        confirm_power_kwh_increment_ratio = null ,
+        update_time = null
+        WHERE
+        id IN
+        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">
+            #{recordId}
+        </foreach>
+    </update>
+
+    <update id="updateRecordNormalFlag">
+        UPDATE
+        dcim.record_cabinet_daily_${dcId}
+        SET
+        abnormal_flag = 0,
+        fixed_flag = -1,
+        update_flag = 0,
+        fixed_power_kw_increment_ratio = null ,
+        fixed_power_kwh_increment_ratio = null ,
+        confirm_power_kw = null ,
+        confirm_power_kwh = null ,
+        confirm_power_kw_increment_ratio = null ,
+        confirm_power_kwh_increment_ratio = null ,
+        update_time = null
+        WHERE
+        id IN
+        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">
+            #{recordId}
+        </foreach>
+    </update>
+
+    <select id="getTableByDcId" resultType="java.lang.String">
+        SELECT TABLE_NAME
+        FROM INFORMATION_SCHEMA.TABLES
+        where TABLE_SCHEMA = 'dcim'
+          and TABLE_NAME = 'record_cabinet_daily_${dcId}';
+    </select>
+
+
+    <update id="createTable" parameterType="String">
+        CREATE TABLE `dcim`.`record_cabinet_daily_${dcId}`
+        (
+            `id`                                 int(11) NOT NULL AUTO_INCREMENT,
+            `overview_id`                        int(11) NOT NULL COMMENT '关联概览id',
+            `collect_time`                       datetime NOT NULL COMMENT '采集时间',
+            `cabinet_id`                         int(11) NOT NULL COMMENT '机柜id，来源cbms.sys_cabinet.cabinet_id',
+            `cabinet_name`                       varchar(10) COLLATE utf8_unicode_ci  DEFAULT NULL COMMENT '机柜名，来源cbms.sys_cabinet.name',
+            `room_id`                            int(11) DEFAULT NULL COMMENT '机房id，来源cbms.sys_cabinet.room_id',
+            `room_name`                          varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '机房名，来源dcrm.room.name',
+            `project_code`                       varchar(20) COLLATE utf8_unicode_ci  DEFAULT NULL COMMENT '项目编号，来源cbms.sys_cabinet.project_code',
+            `cntrct_elec_kva`                    decimal(10, 2)                       DEFAULT NULL COMMENT '合约电力，来源cbms.sys_cabinet.cntrct_elec_kva',
+            `a_customer_id`                      bigint(20) DEFAULT NULL COMMENT '甲方客户id，来源cip.cip_project.a_customer_id',
+            `a_customer_name`                    varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '甲方客户名，来源cip.cip_customer.name',
+            `end_customer_id`                    bigint(20) DEFAULT NULL COMMENT '最终客户id，来源cip.cip_project.end_customer_id',
+            `end_customer_name`                  varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '最终客户名，来源cip.cip_customer.name',
+            `elect_status`                       tinyint(1) NOT NULL DEFAULT 0 COMMENT '上电状态，0：未上电，1：上电，来源：cbms.sys_cabinet.elec_status',
+            `attr_cnt`                           int(11) NOT NULL DEFAULT 0 COMMENT '机柜配电数量，来源cbms.sys_cabinet.attr_count',
+            `original_power_kw`                  double   DEFAULT NULL COMMENT '功率原始值',
+            `original_power_kwh`                 double   DEFAULT NULL COMMENT '电度原始值',
+            `original_current`                   double   DEFAULT NULL COMMENT '电流原始值',
+            `original_power_kw_increment_ratio`  double   DEFAULT NULL COMMENT '功率原始值环比',
+            `original_power_kwh_increment_ratio` double   DEFAULT NULL COMMENT '电度原始值环比',
+            `fixed_power_kw`                     double   DEFAULT NULL COMMENT '功率修正值',
+            `fixed_power_kwh`                    double   DEFAULT NULL COMMENT '电度修正值',
+            `fixed_power_kw_increment_ratio`     double   DEFAULT NULL COMMENT '功率修正值环比',
+            `fixed_power_kwh_increment_ratio`    double   DEFAULT NULL COMMENT '电度修正值环比',
+            `confirm_power_kw`                   double   DEFAULT NULL COMMENT '功率确认值',
+            `confirm_power_kwh`                  double   DEFAULT NULL COMMENT '电度确认值',
+            `confirm_power_kw_increment_ratio`   double   DEFAULT NULL COMMENT '功率确认值环比',
+            `confirm_power_kwh_increment_ratio`  double   DEFAULT NULL COMMENT '电度确认值环比',
+            `yesterday_power_kw`                 double   DEFAULT NULL COMMENT '昨日功率（环比参考值）',
+            `yesterday_power_kwh`                double   DEFAULT NULL COMMENT '昨日电度（环比参考值）',
+            `first_power_kwh`                    double   DEFAULT NULL COMMENT '一天的电度起始值',
+            `last_power_kwh`                     double   DEFAULT NULL COMMENT '一天的电度结束值',
+            `abnormal_flag`                      tinyint(4) NOT NULL DEFAULT 0 COMMENT '是否有异常，1：是，0：否',
+            `update_flag`                        tinyint(4) NOT NULL DEFAULT 0 COMMENT '是否已修改，0：未修改，1：修改了功率，2：修改了电度，3：全都修改了',
+            `fixed_flag`                         tinyint(4) NOT NULL DEFAULT -1 COMMENT '是否已处理异常，-1：无需处理，0：未处理，1：已处理',
+            `update_time`                        datetime DEFAULT NULL COMMENT '更新时间',
+            `auto_fixed_flag`                    tinyint(4) NOT NULL DEFAULT 0 COMMENT '是否是自动修正,  0: 人工修正 , 1: 系统自动修正',
+            PRIMARY KEY (`id`) USING BTREE,
+            UNIQUE KEY `idx_collect_time_cabinet_id` (`collect_time`,`cabinet_id`) USING BTREE,
+            KEY                                  `idx_update_time` (`update_time`) USING BTREE,
+            KEY                                  `idx_overview_id_room_id_cabinet_name` (`overview_id`,`room_id`,`cabinet_name`) USING BTREE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='机柜指标日填报详情表';
+    </update>
+
+    <update id="updateValueBatch">
+        update dcim.record_cabinet_daily_${dcId}
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="original_power_kw = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.originalPowerKw}
+                </foreach>
+            </trim>
+            <trim prefix="original_power_kwh = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.originalPowerKwh}
+                </foreach>
+            </trim>
+            <trim prefix="original_current = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.originalCurrent}
+                </foreach>
+            </trim>
+            <trim prefix="original_power_kwh_increment_ratio = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then
+                    #{recordCabinetDaily.originalPowerKwhIncrementRatio}
+                </foreach>
+            </trim>
+            <trim prefix="original_power_kw_increment_ratio = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then
+                    #{recordCabinetDaily.originalPowerKwIncrementRatio}
+                </foreach>
+            </trim>
+            <trim prefix="first_power_kwh = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.firstPowerKwh}
+                </foreach>
+            </trim>
+            <trim prefix="last_power_kwh = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.lastPowerKwh}
+                </foreach>
+            </trim>
+            <trim prefix="fixed_power_kw = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.fixedPowerKw}
+                </foreach>
+            </trim>
+            <trim prefix="fixed_power_kwh = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.fixedPowerKwh}
+                </foreach>
+            </trim>
+            <trim prefix="auto_fixed_flag = case" suffix="end,">
+                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">
+                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.autoFixedFlag}
+                </foreach>
+            </trim>
+        </trim>
+        where
+        collect_time = #{collectTime}
+        AND id in
+        <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" open="(" close=")" separator=",">
+            #{recordCabinetDaily.id}
+        </foreach>
+    </update>
+
+
+    <select id="getDetailList" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">
+        SELECT DISTINCT
+            a.id ,
+            a.overview_id ,
+            a.collect_time ,
+            a.cabinet_id ,
+            a.cabinet_name ,
+            a.room_id ,
+            a.room_name ,
+            a.project_code ,
+            a.cntrct_elec_kva  ,
+            a.a_customer_id ,
+            a.a_customer_name ,
+            a.end_customer_id ,
+            a.end_customer_name ,
+            a.elect_status ,
+            a.attr_cnt ,
+            a.original_power_kw ,
+            a.original_power_kwh ,
+            a.original_power_kw_increment_ratio ,
+            a.original_power_kwh_increment_ratio ,
+            a.fixed_power_kw,
+            a.fixed_power_kwh,
+            a.fixed_power_kw_increment_ratio,
+            a.fixed_power_kwh_increment_ratio,
+            a.confirm_power_kw,
+            a.confirm_power_kwh,
+            a.confirm_power_kw_increment_ratio,
+            a.confirm_power_kwh_increment_ratio,
+            a.yesterday_power_kw,
+            a.yesterday_power_kwh,
+            a.first_power_kwh,
+            a.last_power_kwh,
+            a.abnormal_flag,
+            a.update_flag,
+            a.fixed_flag
+        FROM
+            dcim.record_cabinet_daily_${dcId} a
+        WHERE
+            a.overview_id = #{param.overviewId}
+        <if test="param.roomIds != null and param.roomIds.size() > 0">
+            AND a.room_id IN
+            <foreach collection="param.roomIds" open="(" close=")" separator="," item="roomId">
+                #{roomId}
+            </foreach>
+        </if>
+        <if test="param.projectCodes != null and param.projectCodes.size() > 0">
+            AND a.project_code IN
+            <foreach collection="param.projectCodes" open="(" close=")" separator="," item="projectCode">
+                #{projectCode}
+            </foreach>
+        </if>
+        <if test="param.abnormalFlag != null and param.abnormalFlag">
+            AND a.abnormal_flag = 1
+        </if>
+        <if test="param.fixedFlag != null and param.fixedFlag">
+            AND a.fixed_flag = 0
+        </if>
+        <if test="param.updateFlag != null and param.updateFlag">
+            AND a.update_flag != 0
+        </if>
+        <if test="param.electStatus != null">
+            AND a.elect_status = #{param.electStatus}
+        </if>
+        <if test="param.customerIds != null and param.customerIds.size() > 0">
+            AND (
+                a.a_customer_id IN
+                <foreach collection="param.customerIds" open="(" close=")" separator="," item="customerId">
+                    #{customerId}
+                </foreach>
+                OR
+                a.end_customer_id IN
+                <foreach collection="param.customerIds" open="(" close=")" separator="," item="customerId">
+                    #{customerId}
+                </foreach>
+            )
+        </if>
+        <if test="param.cabinetNames != null and param.cabinetNames.size() > 0">
+            AND
+            <foreach collection="param.cabinetNames" open="(" close=")" separator="OR" item="cabinetName">
+                a.cabinet_name LIKE CONCAT('%',CONCAT(#{cabinetName},'%'))
+            </foreach>
+        </if>
+        <if test="recordIds != null and recordIds.size() > 0">
+            AND
+              id IN
+            <foreach collection="recordIds" open="(" close=")" separator="," item="recordId">
+                #{recordId}
+            </foreach>
+        </if>
+        <if test="param.orderBy != null">
+            ORDER BY
+                ${param.orderBy}
+                <if test="param.order != null">
+                    ${param.order}
+                </if>
+        </if>
+        <if test="param.orderBy == null">
+            ORDER BY a.room_name ASC, a.cabinet_name ASC
+        </if>
+    </select>
+    <select id="getDetailListWithAbnormal" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">
+        SELECT DISTINCT
+            a.id ,
+            a.overview_id ,
+            a.collect_time ,
+            a.cabinet_id ,
+            a.cabinet_name ,
+            a.room_id ,
+            a.room_name ,
+            a.project_code ,
+            a.cntrct_elec_kva  ,
+            a.a_customer_id ,
+            a.a_customer_name ,
+            a.end_customer_id ,
+            a.end_customer_name ,
+            a.elect_status ,
+            a.attr_cnt ,
+            a.original_power_kw ,
+            a.original_power_kwh ,
+            a.original_power_kw_increment_ratio ,
+            a.original_power_kwh_increment_ratio ,
+            a.fixed_power_kw,
+            a.fixed_power_kwh,
+            a.fixed_power_kw_increment_ratio,
+            a.fixed_power_kwh_increment_ratio,
+            a.confirm_power_kw,
+            a.confirm_power_kwh,
+            a.confirm_power_kw_increment_ratio,
+            a.confirm_power_kwh_increment_ratio,
+            a.yesterday_power_kw,
+            a.yesterday_power_kwh,
+            a.first_power_kwh,
+            a.last_power_kwh,
+            a.abnormal_flag,
+            a.update_flag,
+            a.fixed_flag
+        FROM
+            dcim.record_cabinet_daily_${dcId} a
+        JOIN
+            dcim.record_cabinet_daily_abnormal e ON a.id = e.record_id and e.dc_id = #{dcId}
+        WHERE
+            a.overview_id = #{param.overviewId}
+        <if test="param.roomIds != null and param.roomIds.size() > 0">
+            AND a.room_id IN
+            <foreach collection="param.roomIds" open="(" close=")" separator="," item="roomId">
+                #{roomId}
+            </foreach>
+        </if>
+        <if test="param.projectCodes != null and param.projectCodes.size() > 0">
+            AND a.project_code IN
+            <foreach collection="param.projectCodes" open="(" close=")" separator="," item="projectCode">
+                #{projectCode}
+            </foreach>
+        </if>
+        <if test="param.abnormalFlag != null and param.abnormalFlag">
+            AND a.abnormal_flag = 1
+        </if>
+        <if test="param.fixedFlag != null and param.fixedFlag">
+            AND a.fixed_flag = 0
+        </if>
+        <if test="param.updateFlag != null and param.updateFlag">
+            AND a.update_flag != 0
+        </if>
+        <if test="param.electStatus != null">
+            AND a.elect_status = #{param.electStatus}
+        </if>
+        <if test="param.customerIds != null and param.customerIds.size() > 0">
+            AND (
+            a.a_customer_id IN
+            <foreach collection="param.customerIds" open="(" close=")" separator="," item="customerId">
+                #{customerId}
+            </foreach>
+            OR
+            a.end_customer_id IN
+            <foreach collection="param.customerIds" open="(" close=")" separator="," item="customerId">
+                #{customerId}
+            </foreach>
+            )
+        </if>
+        <if test="param.cabinetNames != null and param.cabinetNames.size() > 0">
+            AND
+            <foreach collection="param.cabinetNames" open="(" close=")" separator="OR" item="cabinetName">
+                a.cabinet_name LIKE CONCAT('%',CONCAT(#{cabinetName},'%'))
+            </foreach>
+        </if>
+        <if test="param.abnormalType != null">
+            AND
+                e.rule_id = #{param.abnormalType}
+        </if>
+        <if test="param.orderBy != null">
+            ORDER BY
+            ${param.orderBy}
+            <if test="param.order != null">
+                ${param.order}
+            </if>
+        </if>
+        <if test="param.orderBy == null">
+            ORDER BY a.room_name ASC, a.cabinet_name ASC
+        </if>
+    </select>
+    <select id="getDetailListByCabinetId" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">
+        SELECT
+            id ,
+            overview_id ,
+            collect_time ,
+            cabinet_id ,
+            cabinet_name ,
+            room_id ,
+            room_name ,
+            project_code ,
+            cntrct_elec_kva  ,
+            a_customer_id ,
+            a_customer_name ,
+            end_customer_id ,
+            end_customer_name ,
+            elect_status ,
+            attr_cnt ,
+            original_power_kw ,
+            original_power_kwh ,
+            original_power_kw_increment_ratio ,
+            original_power_kwh_increment_ratio ,
+            fixed_power_kw,
+            fixed_power_kwh,
+            fixed_power_kw_increment_ratio,
+            fixed_power_kwh_increment_ratio,
+            confirm_power_kw,
+            confirm_power_kwh,
+            confirm_power_kw_increment_ratio,
+            confirm_power_kwh_increment_ratio,
+            yesterday_power_kw,
+            yesterday_power_kwh,
+            first_power_kwh,
+            last_power_kwh,
+            abnormal_flag,
+            update_flag,
+            fixed_flag
+        FROM
+            dcim.record_cabinet_daily_${dcId}
+        WHERE
+            collect_time <![CDATA[ >= ]]> #{startTime}
+        AND
+        collect_time <![CDATA[ < ]]> #{endTime}
+        <if test="cabinetIdList != null and cabinetIdList.size() > 0">
+            AND
+            cabinet_id
+            IN
+            <foreach collection="cabinetIdList" item="cabinet_id" open="(" close=")" separator=",">
+                #{cabinet_id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectAuxiliaryInfo" resultType="com.gds.jpi.dcim.model.SysCabinet">
+        SELECT elec_status, elec_update_time,cabinet_id
+        FROM cbms.sys_cabinet
+        WHERE
+        <if test="cabinetIds != null and cabinetIds.size() > 0">
+            cabinet_id
+            IN
+            <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">
+                #{cabinetId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectModuleInfo" resultType="com.gds.jpi.dcim.model.SysCabinetLog">
+        SELECT ope_time,cabinet_id
+        FROM cbms.sys_cabinet_log
+        WHERE
+        module = 1 AND
+        ope_time IS NOT NULL
+        <if test="cabinetIds != null and cabinetIds.size() > 0">
+            AND cabinet_id
+            IN
+            <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">
+                #{cabinetId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectCabinetYesterdayValue" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">
+        SELECT
+        id ,
+        attr_cnt ,
+        overview_id ,
+        collect_time ,
+        cabinet_id ,
+        original_power_kw ,
+        original_power_kwh,
+        fixed_power_kw,
+        fixed_power_kwh,
+        confirm_power_kw,
+        confirm_power_kwh
+        FROM dcim.record_cabinet_daily_${dcId}
+        WHERE
+        collect_time = #{yesterday}
+        <if test="cabinetIds != null and cabinetIds.size() > 0">
+            AND cabinet_id
+            IN
+            <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">
+                #{cabinetId}
+            </foreach>
+        </if>
+    </select>
+    <select id="selectByCollectTime" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">
+        SELECT
+            id ,
+            overview_id ,
+            collect_time ,
+            cabinet_id ,
+            cabinet_name ,
+            room_id ,
+            room_name ,
+            project_code ,
+            cntrct_elec_kva  ,
+            a_customer_id ,
+            a_customer_name ,
+            end_customer_id ,
+            end_customer_name ,
+            elect_status ,
+            attr_cnt ,
+            original_power_kw ,
+            original_power_kwh ,
+            original_power_kw_increment_ratio ,
+            original_power_kwh_increment_ratio ,
+            fixed_power_kw,
+            fixed_power_kwh,
+            fixed_power_kw_increment_ratio,
+            fixed_power_kwh_increment_ratio,
+            confirm_power_kw,
+            confirm_power_kwh,
+            confirm_power_kw_increment_ratio,
+            confirm_power_kwh_increment_ratio,
+            yesterday_power_kw,
+            yesterday_power_kwh,
+            first_power_kwh,
+            last_power_kwh,
+            abnormal_flag,
+            update_flag,
+            fixed_flag
+        FROM dcim.record_cabinet_daily_${dcId}
+        WHERE collect_time = #{collectTime}
+    </select>
+
+    <select id="selectCabinets" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">
+        SELECT id,
+               elect_status,
+               attr_cnt,
+               overview_id,
+               collect_time,
+               cabinet_id,
+               original_power_kw,
+               original_power_kwh,
+               fixed_power_kw,
+               fixed_power_kwh,
+               confirm_power_kw,
+               confirm_power_kwh,
+               yesterday_power_kw,
+               yesterday_power_kwh,
+               room_id
+        FROM dcim.record_cabinet_daily_${dcId}
+        WHERE collect_time = #{collectTime}
+    </select>
+    <select id="searchShouldAutoFixRooms" resultType="com.gds.jpi.dcim.model.record.RecordCabinetAutoFixRoom">
+        select * from dcim.record_cabinet_auto_fix_room;
+    </select>
+
+    <select id="searchDcTablesNames" resultType="java.lang.String">
+        select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = 'dcim' and TABLE_NAME regexp 'record_cabinet_daily_\\d+';
+    </select>
+    <select id="searchCabinetPeriodFixedValuesOfCollectTime" resultType="java.time.LocalDateTime">
+        select collect_time from dcim.record_cabinet_daily_${dcId} where update_time <![CDATA[ >= ]]>  #{startTime} and update_time <![CDATA[ < ]]> #{endTime}
+    </select>
+    <select id="searchCabinetPeriodFixedValues" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">
+        select * from dcim.record_cabinet_daily_${dcId} where update_time <![CDATA[ >= ]]>  #{startTime} and update_time <![CDATA[ < ]]> #{endTime}
+    </select>
+    <select id="searchCabinetDailyConfirmValues"
+            resultType="com.gds.jpi.dcim.vo.record.CabinetDailyConfirmValuesResponse">
+        SELECT
+            collect_time AS daily,
+            room_id,
+            cabinet_id,
+            cabinet_name,
+            elect_status,
+            IFNULL(confirm_power_kw, IFNULL(fixed_power_kw, original_power_kw)) AS kw_avg,
+            IFNULL(confirm_power_kwh, IFNULL(fixed_power_kwh, original_power_kwh)) AS kwh_actual,
+            original_current AS amp_avg
+        FROM
+            dcim.record_cabinet_daily_${dcId}
+        WHERE
+            collect_time <![CDATA[ >= ]]> #{startTime}
+        AND
+            collect_time <![CDATA[ <= ]]> #{endTime}
+        <if test="cabinetIds != null and cabinetIds.size() > 0">
+            AND
+            cabinet_id
+            IN
+            <foreach collection="cabinetIds" item="cabinet_id" open="(" close=")" separator=",">
+                #{cabinet_id}
+            </foreach>
+        </if>
+    </select>
+    <select id="checkError" resultType="java.lang.String">
+        SELECT
+            DISTINCT
+            ru.name
+        FROM
+            dcim.record_cabinet_daily_${dcId} r
+        JOIN
+            dcim.record_cabinet_daily_abnormal a ON a.dc_id = #{dcId} AND a.record_id = r.id
+        JOIN
+            dcim.cabinet_indi_abnormal_rule ru ON ru.id = a.rule_id
+        WHERE
+            r.overview_id = #{overviewId}
+            AND r.fixed_flag = 0
+            AND a.fixed_flag = 0
+            AND ru.type = 1
+    </select>
+    <select id="getExpiredRecordId" resultType="java.lang.Integer">
+        SELECT
+            id
+        FROM
+            dcim.record_cabinet_daily_${dcId}
+        WHERE
+            collect_time &gt; #{expiredTime}
+        ORDER BY
+            id
+        LIMIT 1
+    </select>
+
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.RecordCabinetDailyMapper">\n    <insert id="insertBatch" keyProperty="list.id" useGeneratedKeys="true" parameterType="java.util.ArrayList">\n        INSERT INTO dcim.record_cabinet_daily_${dcId}\n        (overview_id, collect_time,cabinet_id,cabinet_name,\n        room_id,room_name,project_code,cntrct_elec_kva,elect_status,attr_cnt,\n        a_customer_id,a_customer_name,end_customer_id,end_customer_name,\n        original_power_kw,original_power_kwh,original_power_kw_increment_ratio,original_power_kwh_increment_ratio,\n        yesterday_power_kw,yesterday_power_kwh,first_power_kwh,last_power_kwh)\n        VALUES\n        <foreach collection="list" item="item" separator=",">\n            (#{item.overviewId}, #{item.collectTime}, #{item.cabinetId}, #{item.cabinetName},\n            #{item.roomId}, #{item.roomName}, #{item.projectCode}, #{item.cntrctElecKva}, #{item.electStatus},\n            #{item.attrCnt},\n            #{item.aCustomerId}, #{item.aCustomerName}, #{item.endCustomerId}, #{item.endCustomerName},\n            #{item.originalPowerKw}, #{item.originalPowerKwh},\n            #{item.originalPowerKwIncrementRatio},#{item.originalPowerKwhIncrementRatio},\n            #{item.yesterdayPowerKw}, #{item.yesterdayPowerKwh}, #{item.firstPowerKwh}, #{item.lastPowerKwh})\n        </foreach>\n    </insert>\n    <update id="fillConfirmValue">\n        UPDATE\n            dcim.record_cabinet_daily_${dcId}\n        SET confirm_power_kw                  = IFNULL(fixed_power_kw, original_power_kw),\n            confirm_power_kwh                 = IFNULL(fixed_power_kwh, original_power_kwh),\n            confirm_power_kw_increment_ratio  = IFNULL(fixed_power_kw_increment_ratio,\n                                                       original_power_kw_increment_ratio),\n            confirm_power_kwh_increment_ratio = IFNULL(fixed_power_kwh_increment_ratio,\n                                                       original_power_kwh_increment_ratio)\n        WHERE overview_id = #{overviewId}\n    </update>\n    <update id="fillKwConfirmValue">\n        UPDATE\n            dcim.record_cabinet_daily_${dcId}\n        SET confirm_power_kw                  = IFNULL(fixed_power_kw, original_power_kw),\n            confirm_power_kw_increment_ratio  = IFNULL(fixed_power_kw_increment_ratio,\n                                                       original_power_kw_increment_ratio)\n        WHERE confirm_power_kw is null AND #{endTime} > collect_time\n    </update>\n    <update id="fillKwhConfirmValue">\n        UPDATE\n            dcim.record_cabinet_daily_${dcId}\n        SET confirm_power_kwh                  = IFNULL(fixed_power_kwh, original_power_kwh),\n            confirm_power_kwh_increment_ratio  = IFNULL(fixed_power_kwh_increment_ratio,\n                                                        original_power_kwh_increment_ratio)\n        WHERE confirm_power_kwh is null AND #{endTime} > collect_time\n    </update>\n    <select id="fetchRecordsByIds" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">\n        SELECT\n            id,\n            overview_id,\n            collect_time,\n            cabinet_id,\n            attr_cnt,\n            original_power_kw,\n            original_power_kwh,\n            fixed_power_kw,\n            fixed_power_kwh,\n            yesterday_power_kw,\n            yesterday_power_kwh,\n            abnormal_flag,\n            update_flag,\n            fixed_flag\n        FROM\n            dcim.record_cabinet_daily_${dcId}\n        WHERE\n            id IN\n        <foreach collection="recordIds" item="recordId" open="(" close=")" separator=",">\n            #{recordId}\n        </foreach>\n    </select>\n    <update id="updateRecord">\n        UPDATE\n            dcim.record_cabinet_daily_${dcId}\n        SET\n        <if test="newRecord.fixedPowerKw != null">\n            fixed_power_kw = #{newRecord.fixedPowerKw},\n        </if>\n        <if test="newRecord.fixedPowerKwh != null">\n            fixed_power_kwh = #{newRecord.fixedPowerKwh},\n        </if>\n        <if test="newRecord.fixedPowerKwIncrementRatio != null">\n            fixed_power_kw_increment_ratio = #{newRecord.fixedPowerKwIncrementRatio},\n        </if>\n        <if test="newRecord.fixedPowerKwhIncrementRatio != null">\n            fixed_power_kwh_increment_ratio = #{newRecord.fixedPowerKwhIncrementRatio},\n        </if>\n        <if test="newRecord.fixedFlag != null">\n            fixed_flag = #{newRecord.fixedFlag},\n        </if>\n            update_flag = #{newRecord.updateFlag},\n            update_time = now()\n        WHERE\n            id = #{newRecord.id}\n    </update>\n    <update id="updateRecordByPower">\n        UPDATE\n            dcim.record_cabinet_daily_${dcId}\n        SET\n            fixed_power_kwh = ROUND(IFNULL(fixed_power_kw, original_power_kw) * 24, 2),\n            fixed_power_kwh_increment_ratio = IF(yesterday_power_kwh = 0, null,\n                ROUND((IFNULL(fixed_power_kw, original_power_kw) * 24 - yesterday_power_kwh) / yesterday_power_kwh, 4)\n            ),\n            update_flag = (update_flag | 2),\n            update_time = now()\n        WHERE\n            id IN\n        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">\n            #{recordId}\n        </foreach>\n    </update>\n    <update id="updateRecordByPowerConsumption">\n        UPDATE\n            dcim.record_cabinet_daily_${dcId}\n        SET\n            fixed_power_kw = ROUND(IFNULL(fixed_power_kwh, original_power_kwh) / 24, 2),\n            fixed_power_kw_increment_ratio = IF(yesterday_power_kw = 0, null,\n                ROUND((IFNULL(fixed_power_kwh, original_power_kwh) / 24 - yesterday_power_kw) / yesterday_power_kw, 4)\n            ),\n            update_flag = (update_flag | 1),\n            update_time = now()\n        WHERE\n            id IN\n        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">\n            #{recordId}\n        </foreach>\n    </update>\n    <update id="updateRecordToZero">\n        UPDATE\n            dcim.record_cabinet_daily_${dcId}\n        SET\n            fixed_power_kw = 0,\n        fixed_power_kwh = 0,\n        fixed_power_kw_increment_ratio = IF(yesterday_power_kw = 0, null,\n        ROUND((0 - yesterday_power_kw) / yesterday_power_kw, 4)\n        ),\n        fixed_power_kwh_increment_ratio = IF(yesterday_power_kwh = 0, null,\n        ROUND((0 - yesterday_power_kwh) / yesterday_power_kwh, 4)\n        ),\n        update_flag = (update_flag | 3),\n        update_time = now()\n        WHERE\n        id IN\n        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">\n            #{recordId}\n        </foreach>\n    </update>\n    <update id="updateFixedFlagByIds">\n        UPDATE\n            dcim.record_cabinet_daily_${dcId}\n        SET\n            fixed_flag = 1\n        WHERE\n            id IN\n        <foreach collection="fixedIds" item="fixedId" open="(" separator="," close=")">\n            #{fixedId}\n        </foreach>\n    </update>\n\n    <update id="updateRecordAbnormalFlag">\n        UPDATE\n        dcim.record_cabinet_daily_${dcId}\n        SET\n        abnormal_flag = 1,\n        fixed_flag = 0,\n        update_flag = 0,\n        fixed_power_kw_increment_ratio = null ,\n        fixed_power_kwh_increment_ratio = null ,\n        confirm_power_kw = null ,\n        confirm_power_kwh = null ,\n        confirm_power_kw_increment_ratio = null ,\n        confirm_power_kwh_increment_ratio = null ,\n        update_time = null\n        WHERE\n        id IN\n        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">\n            #{recordId}\n        </foreach>\n    </update>\n\n    <update id="updateRecordNormalFlag">\n        UPDATE\n        dcim.record_cabinet_daily_${dcId}\n        SET\n        abnormal_flag = 0,\n        fixed_flag = -1,\n        update_flag = 0,\n        fixed_power_kw_increment_ratio = null ,\n        fixed_power_kwh_increment_ratio = null ,\n        confirm_power_kw = null ,\n        confirm_power_kwh = null ,\n        confirm_power_kw_increment_ratio = null ,\n        confirm_power_kwh_increment_ratio = null ,\n        update_time = null\n        WHERE\n        id IN\n        <foreach collection="recordIds" item="recordId" open="(" separator="," close=")">\n            #{recordId}\n        </foreach>\n    </update>\n\n    <select id="getTableByDcId" resultType="java.lang.String">\n        SELECT TABLE_NAME\n        FROM INFORMATION_SCHEMA.TABLES\n        where TABLE_SCHEMA = 'dcim'\n          and TABLE_NAME = 'record_cabinet_daily_${dcId}';\n    </select>\n\n    <update id="createTable" parameterType="String">\n        CREATE TABLE `dcim`.`record_cabinet_daily_${dcId}`\n(\n    `id`                                 int(11) NOT NULL AUTO_INCREMENT,\n    `overview_id`                        int(11) NOT NULL COMMENT 'Associated overview id',\n    `collect_time`                       datetime NOT NULL COMMENT 'Collection time',\n    `cabinet_id`                         int(11) NOT NULL COMMENT 'Cabinet ID, sourced from cbms.sys_cabinet.cabinet_id',\n    `cabinet_name`                       varchar(10) COLLATE utf8_unicode_ci  DEFAULT NULL COMMENT 'Cabinet name, sourced from cbms.sys_cabinet.name',\n    `room_id`                            int(11) DEFAULT NULL COMMENT 'Room ID, sourced from cbms.sys_cabinet.room_id',\n    `room_name`                          varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Room name, sourced from dcrm.room.name',\n    `project_code`                       varchar(20) COLLATE utf8_unicode_ci  DEFAULT NULL COMMENT 'Project code, sourced from cbms.sys_cabinet.project_code',\n    `cntrct_elec_kva`                    decimal(10, 2)                       DEFAULT NULL COMMENT 'Contract electricity, sourced from cbms.sys_cabinet.cntrct_elec_kva',\n    `a_customer_id`                      bigint(20) DEFAULT NULL COMMENT 'Primary customer ID, sourced from cip.cip_project.a_customer_id',\n    `a_customer_name`                    varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Primary customer name, sourced from cip.cip_customer.name',\n    `end_customer_id`                    bigint(20) DEFAULT NULL COMMENT 'End customer ID, sourced from cip.cip_project.end_customer_id',\n    `end_customer_name`                  varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'End customer name, sourced from cip.cip_customer.name',\n    `elect_status`                       tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Power status, 0: Unpowered, 1: Powered, sourced from cbms.sys_cabinet.elec_status',\n    `attr_cnt`                           int(11) NOT NULL DEFAULT 0 COMMENT 'Number of cabinet power distributions, sourced from cbms.sys_cabinet.attr_count',\n    `original_power_kw`                  double   DEFAULT NULL COMMENT 'Original power value',\n    `original_power_kwh`                 double   DEFAULT NULL COMMENT 'Original electricity value',\n    `original_current`                   double   DEFAULT NULL COMMENT 'Original current value',\n    `original_power_kw_increment_ratio`  double   DEFAULT NULL COMMENT 'Original power increment ratio',\n    `original_power_kwh_increment_ratio` double   DEFAULT NULL COMMENT 'Original electricity increment ratio',\n    `fixed_power_kw`                     double   DEFAULT NULL COMMENT 'Corrected power value',\n    `fixed_power_kwh`                    double   DEFAULT NULL COMMENT 'Corrected electricity value',\n    `fixed_power_kw_increment_ratio`     double   DEFAULT NULL COMMENT 'Corrected power increment ratio',\n    `fixed_power_kwh_increment_ratio`    double   DEFAULT NULL COMMENT 'Corrected electricity increment ratio',\n    `confirm_power_kw`                   double   DEFAULT NULL COMMENT 'Confirmed power value',\n    `confirm_power_kwh`                  double   DEFAULT NULL COMMENT 'Confirmed electricity value',\n    `confirm_power_kw_increment_ratio`   double   DEFAULT NULL COMMENT 'Confirmed power increment ratio',\n    `confirm_power_kwh_increment_ratio`  double   DEFAULT NULL COMMENT 'Confirmed electricity increment ratio',\n    `yesterday_power_kw`                 double   DEFAULT NULL COMMENT 'Yesterday's power (reference value for comparison)',\n    `yesterday_power_kwh`                double   DEFAULT NULL COMMENT 'Yesterday's electricity (reference value for comparison)',\n    `first_power_kwh`                    double   DEFAULT NULL COMMENT 'Electricity start value for the day',\n    `last_power_kwh`                     double   DEFAULT NULL COMMENT 'Electricity end value for the day',\n    `abnormal_flag`                      tinyint(4) NOT NULL DEFAULT 0 COMMENT 'Abnormal flag, 1: Yes, 0: No',\n    `update_flag`                        tinyint(4) NOT NULL DEFAULT 0 COMMENT 'Update flag, 0: No update, 1: Power updated, 2: Electricity updated, 3: Both updated',\n    `fixed_flag`                         tinyint(4) NOT NULL DEFAULT -1 COMMENT 'Abnormal processing flag, -1: No processing needed, 0: Not processed, 1: Processed',\n    `update_time`                        datetime DEFAULT NULL COMMENT 'Update time',\n    `auto_fixed_flag`                    tinyint(4) NOT NULL DEFAULT 0 COMMENT 'Automatic correction flag, 0: Manual correction, 1: System automatic correction',\n    PRIMARY KEY (`id`) USING BTREE,\n    UNIQUE KEY `idx_collect_time_cabinet_id` (`collect_time`,`cabinet_id`) USING BTREE,\n    KEY                                  `idx_update_time` (`update_time`) USING BTREE,\n    KEY                                  `idx_overview_id_room_id_cabinet_name` (`overview_id`,`room_id`,`cabinet_name`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='Daily cabinet index reporting detail table';\n    </update>\n\n    <update id="updateValueBatch">\n        update dcim.record_cabinet_daily_${dcId}\n        <trim prefix="set" suffixOverrides=",">\n            <trim prefix="original_power_kw = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.originalPowerKw}\n                </foreach>\n            </trim>\n            <trim prefix="original_power_kwh = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.originalPowerKwh}\n                </foreach>\n            </trim>\n            <trim prefix="original_current = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.originalCurrent}\n                </foreach>\n            </trim>\n            <trim prefix="original_power_kwh_increment_ratio = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then\n                    #{recordCabinetDaily.originalPowerKwhIncrementRatio}\n                </foreach>\n            </trim>\n            <trim prefix="original_power_kw_increment_ratio = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then\n                    #{recordCabinetDaily.originalPowerKwIncrementRatio}\n                </foreach>\n            </trim>\n            <trim prefix="first_power_kwh = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.firstPowerKwh}\n                </foreach>\n            </trim>\n            <trim prefix="last_power_kwh = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.lastPowerKwh}\n                </foreach>\n            </trim>\n            <trim prefix="fixed_power_kw = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.fixedPowerKw}\n                </foreach>\n            </trim>\n            <trim prefix="fixed_power_kwh = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.fixedPowerKwh}\n                </foreach>\n            </trim>\n            <trim prefix="auto_fixed_flag = case" suffix="end,">\n                <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" index="index">\n                    when id= #{recordCabinetDaily.id} then #{recordCabinetDaily.autoFixedFlag}\n                </foreach>\n            </trim>\n        </trim>\n        where\n        collect_time = #{collectTime}\n        AND id in\n        <foreach collection="recordCabinetDailyList" item="recordCabinetDaily" open="(" close=")" separator=",">\n            #{recordCabinetDaily.id}\n        </foreach>\n    </update>\n\n    <select id="getDetailList" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">\n        SELECT DISTINCT\n            a.id ,\n            a.overview_id ,\n            a.collect_time ,\n            a.cabinet_id ,\n            a.cabinet_name ,\n            a.room_id ,\n            a.room_name ,\n            a.project_code ,\n            a.cntrct_elec_kva  ,\n            a.a_customer_id ,\n            a.a_customer_name ,\n            a.end_customer_id ,\n            a.end_customer_name ,\n            a.elect_status ,\n            a.attr_cnt ,\n            a.original_power_kw ,\n            a.original_power_kwh ,\n            a.original_power_kw_increment_ratio ,\n            a.original_power_kwh_increment_ratio ,\n            a.fixed_power_kw,\n            a.fixed_power_kwh,\n            a.fixed_power_kw_increment_ratio,\n            a.fixed_power_kwh_increment_ratio,\n            a.confirm_power_kw,\n            a.confirm_power_kwh,\n            a.confirm_power_kw_increment_ratio,\n            a.confirm_power_kwh_increment_ratio,\n            a.yesterday_power_kw,\n            a.yesterday_power_kwh,\n            a.first_power_kwh,\n            a.last_power_kwh,\n            a.abnormal_flag,\n            a.update_flag,\n            a.fixed_flag\n        FROM\n            dcim.record_cabinet_daily_${dcId} a\n        WHERE\n            a.overview_id = #{param.overviewId}\n        <if test="param.roomIds != null and param.roomIds.size() > 0">\n            AND a.room_id IN\n            <foreach collection="param.roomIds" open="(" close=")" separator="," item="roomId">\n                #{roomId}\n            </foreach>\n        </if>\n        <if test="param.projectCodes != null and param.projectCodes.size() > 0">\n            AND a.project_code IN\n            <foreach collection="param.projectCodes" open="(" close=")" separator="," item="projectCode">\n                #{projectCode}\n            </foreach>\n        </if>\n        <if test="param.abnormalFlag != null and param.abnormalFlag">\n            AND a.abnormal_flag = 1\n        </if>\n        <if test="param.fixedFlag != null and param.fixedFlag">\n            AND a.fixed_flag = 0\n        </if>\n        <if test="param.updateFlag != null and param.updateFlag">\n            AND a.update_flag != 0\n        </if>\n        <if test="param.electStatus != null">\n            AND a.elect_status = #{param.electStatus}\n        </if>\n        <if test="param.customerIds != null and param.customerIds.size() > 0">\n            AND (\n                a.a_customer_id IN\n                <foreach collection="param.customerIds" open="(" close=")" separator="," item="customerId">\n                    #{customerId}\n                </foreach>\n                OR\n                a.end_customer_id IN\n                <foreach collection="param.customerIds" open="(" close=")" separator="," item="customerId">\n                    #{customerId}\n                </foreach>\n            )\n        </if>\n        <if test="param.cabinetNames != null and param.cabinetNames.size() > 0">\n            AND\n            <foreach collection="param.cabinetNames" open="(" close=")" separator="OR" item="cabinetName">\n                a.cabinet_name LIKE CONCAT('%',CONCAT(#{cabinetName},'%'))\n            </foreach>\n        </if>\n        <if test="recordIds != null and recordIds.size() > 0">\n            AND\n              id IN\n            <foreach collection="recordIds" open="(" close=")" separator=",">\n                #{recordId}\n            </foreach>\n        </if>\n        <if test="param.orderBy != null">\n            ORDER BY\n                ${param.orderBy}\n                <if test="param.order != null">\n                    ${param.order}\n                </if>\n        </if>\n        <if test="param.orderBy == null">\n            ORDER BY a.room_name ASC, a.cabinet_name ASC\n        </if>\n    </select>\n    <select id="getDetailListWithAbnormal" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">\n        SELECT DISTINCT\n            a.id ,\n            a.overview_id ,\n            a.collect_time ,\n            a.cabinet_id ,\n            a.cabinet_name ,\n            a.room_id ,\n            a.room_name ,\n            a.project_code ,\n            a.cntrct_elec_kva  ,\n            a.a_customer_id ,\n            a.a_customer_name ,\n            a.end_customer_id ,\n            a.end_customer_name ,\n            a.elect_status ,\n            a.attr_cnt ,\n            a.original_power_kw ,\n            a.original_power_kwh ,\n            a.original_power_kw_increment_ratio ,\n            a.original_power_kwh_increment_ratio ,\n            a.fixed_power_kw,\n            a.fixed_power_kwh,\n            a.fixed_power_kw_increment_ratio,\n            a.fixed_power_kwh_increment_ratio,\n            a.confirm_power_kw,\n            a.confirm_power_kwh,\n            a.confirm_power_kw_increment_ratio,\n            a.confirm_power_kwh_increment_ratio,\n            a.yesterday_power_kw,\n            a.yesterday_power_kwh,\n            a.first_power_kwh,\n            a.last_power_kwh,\n            a.abnormal_flag,\n            a.update_flag,\n            a.fixed_flag\n        FROM\n            dcim.record_cabinet_daily_${dcId} a\n        JOIN\n            dcim.record_cabinet_daily_abnormal e ON a.id = e.record_id and e.dc_id = #{dcId}\n        WHERE\n            a.overview_id = #{param.overviewId}\n        <if test="param.roomIds != null and param.roomIds.size() > 0">\n            AND a.room_id IN\n            <foreach collection="param.roomIds" open="(" close=")" separator="," item="roomId">\n                #{roomId}\n            </foreach>\n        </if>\n        <if test="param.projectCodes != null and param.projectCodes.size() > 0">\n            AND a.project_code IN\n            <foreach collection="param.projectCodes" open="(" close=")" separator="," item="projectCode">\n                #{projectCode}\n            </foreach>\n        </if>\n        <if test="param.abnormalFlag != null and param.abnormalFlag">\n            AND a.abnormal_flag = 1\n        </if>\n        <if test="param.fixedFlag != null and param.fixedFlag">\n            AND a.fixed_flag = 0\n        </if>\n        <if test="param.updateFlag != null and param.updateFlag">\n            AND a.update_flag != 0\n        </if>\n        <if test="param.electStatus != null">\n            AND a.elect_status = #{param.electStatus}\n        </if>\n        <if test="param.customerIds != null and param.customerIds.size() > 0">\n            AND (\n            a.a_customer_id IN\n            <foreach collection="param.customerIds" open="(" close=")" separator="," item="customerId">\n                #{customerId}\n            </foreach>\n            OR\n            a.end_customer_id IN\n            <foreach collection="param.customerIds" open="(" close=")" separator="," item="customerId">\n                #{customerId}\n            </foreach>\n            )\n        </if>\n        <if test="param.cabinetNames != null and param.cabinetNames.size() > 0">\n            AND\n            <foreach collection="param.cabinetNames" open="(" close=")" separator="OR" item="cabinetName">\n                a.cabinet_name LIKE CONCAT('%',CONCAT(#{cabinetName},'%'))\n            </foreach>\n        </if>\n        <if test="param.abnormalType != null">\n            AND\n                e.rule_id = #{param.abnormalType}\n        </if>\n        <if test="param.orderBy != null">\n            ORDER BY\n            ${param.orderBy}\n            <if test="param.order != null">\n                ${param.order}\n            </if>\n        </if>\n        <if test="param.orderBy == null">\n            ORDER BY a.room_name ASC, a.cabinet_name ASC\n        </if>\n    </select>\n    <select id="getDetailListByCabinetId" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">\n        SELECT\n            id ,\n            overview_id ,\n            collect_time ,\n            cabinet_id ,\n            cabinet_name ,\n            room_id ,\n            room_name ,\n            project_code ,\n            cntrct_elec_kva  ,\n            a_customer_id ,\n            a_customer_name ,\n            end_customer_id ,\n            end_customer_name ,\n            elect_status ,\n            attr_cnt ,\n            original_power_kw ,\n            original_power_kwh ,\n            original_power_kw_increment_ratio ,\n            original_power_kwh_increment_ratio ,\n            fixed_power_kw,\n            fixed_power_kwh,\n            fixed_power_kw_increment_ratio,\n            fixed_power_kwh_increment_ratio,\n            confirm_power_kw,\n            confirm_power_kwh,\n            confirm_power_kw_increment_ratio,\n            confirm_power_kwh_increment_ratio,\n            yesterday_power_kw,\n            yesterday_power_kwh,\n            first_power_kwh,\n            last_power_kwh,\n            abnormal_flag,\n            update_flag,\n            fixed_flag\n        FROM\n            dcim.record_cabinet_daily_${dcId}\n        WHERE\n            collect_time >= #{startTime}\n        AND\n        collect_time < #{endTime}\n        <if test="cabinetIdList != null and cabinetIdList.size() > 0">\n            AND\n            cabinet_id\n            IN\n            <foreach collection="cabinetIdList" item="cabinet_id" open="(" close=")" separator=",">\n                #{cabinet_id}\n            </foreach>\n        </if>\n    </select>\n\n    <select id="selectAuxiliaryInfo" resultType="com.gds.jpi.dcim.model.SysCabinet">\n        SELECT elec_status, elec_update_time,cabinet_id\n        FROM cbms.sys_cabinet\n        WHERE\n        <if test="cabinetIds != null and cabinetIds.size() > 0">\n            cabinet_id\n            IN\n            <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">\n                #{cabinetId}\n            </foreach>\n        </if>\n    </select>\n\n    <select id="selectModuleInfo" resultType="com.gds.jpi.dcim.model.SysCabinetLog">\n        SELECT ope_time,cabinet_id\n        FROM cbms.sys_cabinet_log\n        WHERE\n        module = 1 AND\n        ope_time IS NOT NULL\n        <if test="cabinetIds != null and cabinetIds.size() > 0">\n            AND cabinet_id\n            IN\n            <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">\n                #{cabinetId}\n            </foreach>\n        </if>\n    </select>\n\n    <select id="selectCabinetYesterdayValue" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">\n        SELECT\n        id ,\n        attr_cnt ,\n        overview_id ,\n        collect_time ,\n        cabinet_id ,\n        original_power_kw ,\n        original_power_kwh,\n        fixed_power_kw,\n        fixed_power_kwh,\n        confirm_power_kw,\n        confirm_power_kwh\n        FROM dcim.record_cabinet_daily_${dcId}\n        WHERE\n        collect_time = #{yesterday}\n        <if test="cabinetIds != null and cabinetIds.size() > 0">\n            AND cabinet_id\n            IN\n            <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">\n                #{cabinetId}\n            </foreach>\n        </if>\n    </select>\n    <select id="selectByCollectTime" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">\n        SELECT\n            id ,\n            overview_id ,\n            collect_time ,\n            cabinet_id ,\n            cabinet_name ,\n            room_id ,\n            room_name ,\n            project_code ,\n            cntrct_elec_kva  ,\n            a_customer_id ,\n            a_customer_name ,\n            end_customer_id ,\n            end_customer_name ,\n            elect_status ,\n            attr_cnt ,\n            original_power_kw ,\n            original_power_kwh ,\n            original_power_kw_increment_ratio ,\n            original_power_kwh_increment_ratio ,\n            fixed_power_kw,\n            fixed_power_kwh,\n            fixed_power_kw_increment_ratio,\n            fixed_power_kwh_increment_ratio,\n            confirm_power_kw,\n            confirm_power_kwh,\n            confirm_power_kw_increment_ratio,\n            confirm_power_kwh_increment_ratio,\n            yesterday_power_kw,\n            yesterday_power_kwh,\n            first_power_kwh,\n            last_power_kwh,\n            abnormal_flag,\n            update_flag,\n            fixed_flag\n        FROM dcim.record_cabinet_daily_${dcId}\n        WHERE collect_time = #{collectTime}\n    </select>\n\n    <select id="selectCabinets" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">\n        SELECT id,\n               elect_status,\n               attr_cnt,\n               overview_id ,\n               collect_time ,\n               cabinet_id ,\n               original_power_kw ,\n               original_power_kwh,\n               fixed_power_kw,\n               fixed_power_kwh,\n               confirm_power_kw,\n               confirm_power_kwh,\n               yesterday_power_kw,\n               yesterday_power_kwh,\n               room_id\n        FROM dcim.record_cabinet_daily_${dcId}\n        WHERE collect_time = #{collectTime}\n    </select>\n    <select id="searchShouldAutoFixRooms" resultType="com.gds.jpi.dcim.model.record.RecordCabinetAutoFixRoom">\n        select * from dcim.record_cabinet_auto_fix_room;\n    </select>\n\n    <select id="searchDcTablesNames" resultType="java.lang.String">\n        select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = 'dcim' and TABLE_NAME regexp 'record_cabinet_daily_\d+';\n    </select>\n    <select id="searchCabinetPeriodFixedValuesOfCollectTime" resultType="java.time.LocalDateTime">\n        select collect_time from dcim.record_cabinet_daily_${dcId} where update_time >=  #{startTime} and update_time < #{endTime}\n    </select>\n    <select id="searchCabinetPeriodFixedValues" resultType="com.gds.jpi.dcim.model.record.RecordCabinetDaily">\n        select * from dcim.record_cabinet_daily_${dcId} where update_time >=  #{startTime} and update_time < #{endTime}\n    </select>\n    <select id="searchCabinetDailyConfirmValues"\n            resultType="com.gds.jpi.dcim.vo.record.CabinetDailyConfirmValuesResponse">\n        SELECT\n            collect_time AS daily,\n            room_id,\n            cabinet_id,\n            cabinet_name,\n            elect_status,\n            IFNULL(confirm_power_kw, IFNULL(fixed_power_kw, original_power_kw)) AS kw_avg,\n            IFNULL(confirm_power_kwh, IFNULL(fixed_power_kwh, original_power_kwh)) AS kwh_actual,\n            original_current AS amp_avg\n        FROM\n            dcim.record_cabinet_daily_${dcId}\n        WHERE\n            collect_time >= #{startTime}\n        AND\n            collect_time <= #{endTime}\n        <if test="cabinetIds != null and cabinetIds.size() > 0">\n            AND\n            cabinet_id\n            IN\n            <foreach collection="cabinetIds" item="cabinet_id" open="(" close=")" separator=",">\n                #{cabinet_id}\n            </foreach>\n        </if>\n    </select>\n    <select id="checkError" resultType="java.lang.String">\n        SELECT\n            DISTINCT\n            ru.name\n        FROM\n            dcim.record_cabinet_daily_${dcId} r\n        JOIN\n            dcim.record_cabinet_daily_abnormal a ON a.dc_id = #{dcId} AND a.record_id = r.id\n        JOIN\n            dcim.cabinet_indi_abnormal_rule ru ON ru.id = a.rule_id\n        WHERE\n            r.overview_id = #{overviewId}\n            AND r.fixed_flag = 0\n            AND a.fixed_flag = 0\n            AND ru.type = 1\n    </select>\n    <select id="getExpiredRecordId" resultType="java.lang.Integer">\n        SELECT\n            id\n        FROM\n            dcim.record_cabinet_daily_${dcId}\n        WHERE\n            collect_time > #{expiredTime}\n        ORDER BY\n            id\n        LIMIT 1\n    </select>\n\n</mapper>",
+"details": [
+    {
+      "lineNumber": 215,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "关联概览id",
+      "translatedText": "Associated overview id"
+    },
+    {
+      "lineNumber": 216,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "采集时间",
+      "translatedText": "Collection time"
+    },
+    {
+      "lineNumber": 217,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "机柜id，来源cbms.sys_cabinet.cabinet_id",
+      "translatedText": "Cabinet ID, sourced from cbms.sys_cabinet.cabinet_id"
+    },
+    {
+      "lineNumber": 218,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "机柜名，来源cbms.sys_cabinet.name",
+      "translatedText": "Cabinet name, sourced from cbms.sys_cabinet.name"
+    },
+    {
+      "lineNumber": 219,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "机房id，来源cbms.sys_cabinet.room_id",
+      "translatedText": "Room ID, sourced from cbms.sys_cabinet.room_id"
+    },
+    {
+      "lineNumber": 220,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "机房名，来源dcrm.room.name",
+      "translatedText": "Room name, sourced from dcrm.room.name"
+    },
+    {
+      "lineNumber": 221,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "项目编号，来源cbms.sys_cabinet.project_code",
+      "translatedText": "Project code, sourced from cbms.sys_cabinet.project_code"
+    },
+    {
+      "lineNumber": 222,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "合约电力，来源cbms.sys_cabinet.cntrct_elec_kva",
+      "translatedText": "Contract electricity, sourced from cbms.sys_cabinet.cntrct_elec_kva"
+    },
+    {
+      "lineNumber": 223,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "甲方客户id，来源cip.cip_project.a_customer_id",
+      "translatedText": "Primary customer ID, sourced from cip.cip_project.a_customer_id"
+    },
+    {
+      "lineNumber": 224,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "甲方客户名，来源cip.cip_customer.name",
+      "translatedText": "Primary customer name, sourced from cip.cip_customer.name"
+    },
+    {
+      "lineNumber": 225,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "最终客户id，来源cip.cip_project.end_customer_id",
+      "translatedText": "End customer ID, sourced from cip.cip_project.end_customer_id"
+    },
+    {
+      "lineNumber": 226,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "最终客户名，来源cip.cip_customer.name",
+      "translatedText": "End customer name, sourced from cip.cip_customer.name"
+    },
+    {
+      "lineNumber": 227,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "上电状态，0：未上电，1：上电，来源：cbms.sys_cabinet.elec_status",
+      "translatedText": "Power status, 0: Unpowered, 1: Powered, sourced from cbms.sys_cabinet.elec_status"
+    },
+    {
+      "lineNumber": 228,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "机柜配电数量，来源cbms.sys_cabinet.attr_count",
+      "translatedText": "Number of cabinet power distributions, sourced from cbms.sys_cabinet.attr_count"
+    },
+    {
+      "lineNumber": 229,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "功率原始值",
+      "translatedText": "Original power value"
+    },
+    {
+      "lineNumber": 230,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "电度原始值",
+      "translatedText": "Original electricity value"
+    },
+    {
+      "lineNumber": 231,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "电流原始值",
+      "translatedText": "Original current value"
+    },
+    {
+      "lineNumber": 232,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "功率原始值环比",
+      "translatedText": "Original power increment ratio"
+    },
+    {
+      "lineNumber": 233,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "电度原始值环比",
+      "translatedText": "Original electricity increment ratio"
+    },
+    {
+      "lineNumber": 234,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "功率修正值",
+      "translatedText": "Corrected power value"
+    },
+    {
+      "lineNumber": 235,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "电度修正值",
+      "translatedText": "Corrected electricity value"
+    },
+    {
+      "lineNumber": 236,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "功率修正值环比",
+      "translatedText": "Corrected power increment ratio"
+    },
+    {
+      "lineNumber": 237,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "电度修正值环比",
+      "translatedText": "Corrected electricity increment ratio"
+    },
+    {
+      "lineNumber": 238,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "功率确认值",
+      "translatedText": "Confirmed power value"
+    },
+    {
+      "lineNumber": 239,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "电度确认值",
+      "translatedText": "Confirmed electricity value"
+    },
+    {
+      "lineNumber": 240,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "功率确认值环比",
+      "translatedText": "Confirmed power increment ratio"
+    },
+    {
+      "lineNumber": 241,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "电度确认值环比",
+      "translatedText": "Confirmed electricity increment ratio"
+    },
+    {
+      "lineNumber": 242,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "昨日功率（环比参考值）",
+      "translatedText": "Yesterday's power (reference value for comparison)"
+    },
+    {
+      "lineNumber": 243,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "昨日电度（环比参考值）",
+      "translatedText": "Yesterday's electricity (reference value for comparison)"
+    },
+    {
+      "lineNumber": 244,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "一天的电度起始值",
+      "translatedText": "Electricity start value for the day"
+    },
+    {
+      "lineNumber": 245,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "一天的电度结束值",
+      "translatedText": "Electricity end value for the day"
+    },
+    {
+      "lineNumber": 246,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "是否有异常，1：是，0：否",
+      "translatedText": "Abnormal flag, 1: Yes, 0: No"
+    },
+    {
+      "lineNumber": 247,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "是否已修改，0：未修改，1：修改了功率，2：修改了电度，3：全都修改了",
+      "translatedText": "Update flag, 0: No update, 1: Power updated, 2: Electricity updated, 3: Both updated"
+    },
+    {
+      "lineNumber": 248,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "是否已处理异常，-1：无需处理，0：未处理，1：已处理",
+      "translatedText": "Abnormal processing flag, -1: No processing needed, 0: Not processed, 1: Processed"
+    },
+    {
+      "lineNumber": 249,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "更新时间",
+      "translatedText": "Update time"
+    },
+    {
+      "lineNumber": 250,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "是否是自动修正,  0: 人工修正 , 1: 系统自动修正",
+      "translatedText": "Automatic correction flag, 0: Manual correction, 1: System automatic correction"
+    },
+    {
+      "lineNumber": 255,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "机柜指标日填报详情表",
+      "translatedText": "Daily cabinet index reporting detail table"
+    }
+  ]
+}
+```
