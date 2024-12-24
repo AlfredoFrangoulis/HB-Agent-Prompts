@@ -6,8 +6,11 @@
 
 - Request the repository access by sending your github email address to Azka
 - Create ur own branch and service ;D
-- Try to tweak this switch cases to process ur file type (maybe theres some escape character or sumn)
+- *((**UPDATE**: Maybe the problem are not from here 💀))* Try to tweak this switch cases to process ur file type (maybe theres some escape character or sumn)
+  
   ![image](https://github.com/user-attachments/assets/bfc89671-b781-4222-8a3d-0800bab7460c)
+  
+  
 
 
 ### Ngrok **—** https://dashboard.ngrok.com/get-started/setup/windows
@@ -32,5 +35,4 @@
 - Use that ngrok URL for the ngrok field in https://hive-bridge.vercel.app/
   (U may need to add your service name after the ngrok url.
   e.g. https://dc95-103-118-101-82.ngrok-free.app/hive-bridge/v1/0)
-
 

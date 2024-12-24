@@ -20,9 +20,10 @@
 - [x] JAVA
 - [x] TS / JS / ECMASCRIPT
 - [x] XML
-- [ ] YML - ON PROGRESS 🚨
+- [x] YML - Finish maybe, still tweaking 🚨
 - [ ] SQL - ON PROGRESS 🚨
 - [ ] VUE - ON PROGRESS 🚨
+- [ ] Properties - ON PROGRESS 🚨
 - [ ] Chinese Logic Agent Training Prompts 💀
 
 ### BACKEND
@@ -32,8 +33,9 @@
 
 ### FRONTEND
 
-- [x] CRUD AGENT PAGE (On Progress) - ON PROGRESS 🚨 gajadi 💀
+- [ ] CRUD AGENT PAGE (On Progress) - ON PROGRESS 🚨 gajadi 💀
 - [x] CHANGE AGENT SELECTION LIST BY FETCHING
+- [x] Session Storage to store Token and Ngrok url
 
 
 
@@ -42,6 +44,9 @@
 ## KNOWN ISSUE
 
 - If the LLM returned the response as code block (using backticks ```) it'll got stored too
+
+  > *java.lang.RuntimeException: Translation failed: Unexpected character ('`' (code 96)): expected a valid value (number, String, array, object, 'true', 'false' or 'null')*
+
   - Current solution 
     - Add prompt condition — e.g. `Ensure the line numbers in "details" align exactly with the original input file (do not add new line). Do not include markdown formatting (e.g., ```json) in the response. Return the JSON as plain text.`
     -  Sanitized the string
