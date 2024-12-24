@@ -2942,3 +2942,263 @@ Keep entities like &gt;, &lt;, &amp;, &lt;=, &gt;= and symbols such as backticks
 "details": []
 }
 ```
+
+### DEMOS10
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.CabinetSafeCapacityInitMapper">
+    <select id="fetchAsymCabinets" resultType="java.lang.Integer">
+        SELECT
+            ca.cabinet_id
+        FROM
+            cbms.sys_cabinet c
+        JOIN
+            cbms.sys_cabinet_attr ca ON ca.cabinet_id = c.cabinet_id
+        WHERE
+            c.dc_id = #{dcId}
+            AND c.`status` = 1
+        GROUP BY
+            ca.cabinet_id
+        HAVING
+            COUNT(DISTINCT elec_sn) = COUNT(*); -- 配电路数 = 配电条数，即所有路都是单路配电的
+    </select>
+    <select id="fetchCabinetAttrs" resultType="com.gds.jpi.dcim.response.CabinetAttrValueResponse">
+        SELECT
+            c.cabinet_id,
+            ca.rel_id,
+            ca.status,
+            ca.elec_sn,
+            ca.elec_type,
+            ca.device_id,
+            d.name AS device_name,
+            d.asset_type_id,
+            at.name AS asset_type_name,
+            at.`code` AS asset_type_code,
+            ca.branch,
+            ca.safe_elec_amp,
+            ca.amp_attr_id,
+            da_amp.tag_id AS amp_tag_id,
+            ca.kw_attr_id,
+            da_kw.tag_id AS kw_tag_id
+        FROM
+            cbms.sys_cabinet c
+        JOIN
+            cbms.sys_cabinet_attr ca ON ca.cabinet_id = c.cabinet_id
+        LEFT JOIN
+            cbms.sys_device d ON d.device_id = ca.device_id AND d.`status` = 1
+        LEFT JOIN
+            asset.asset_type at ON at.id = d.asset_type_id
+        LEFT JOIN
+            cbms.sys_device_attr da_amp ON da_amp.sys_attr_id = ca.amp_attr_id
+        LEFT JOIN
+            cbms.sys_device_attr da_kw ON da_kw.sys_attr_id = ca.kw_attr_id
+        WHERE
+            c.dc_id = #{dcId}
+            AND c.`status` = 1
+            AND c.elec_status = 1
+    </select>
+    <select id="fetchThreePhaseAttrs" resultType="com.gds.jpi.dcim.response.ThreePhaseAttrResponse">
+        SELECT
+            ca.rel_id,
+            ta.code AS temp_attr_code,
+            da.sys_attr_id
+        FROM
+            cbms.sys_cabinet_attr ca
+        JOIN
+            dcim.std_temp_attr ta ON ta.is_del = 0 AND ta.code IN
+        <foreach collection="codes" item="code" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+        JOIN
+            cbms.sys_device_attr da ON da.device_id = ca.device_id AND da.seq = ca.branch AND da.temp_attr_id = ta.temp_attr_id
+        WHERE
+            ca.rel_id IN
+            <foreach collection="relIds" item="relId" open="(" separator="," close=")">
+                #{relId}
+            </foreach>
+    </select>
+    <select id="fetchCabinetInfo" resultType="com.gds.jpi.dcim.model.sharding.CabinetSafeCapacity">
+        SELECT
+            c.dc_id,
+            dm.dc_name_inner_short AS dc_name,
+            c.room_id,
+            r.name AS room_name,
+            c.cabinet_id,
+            c.name AS cabinet_name,
+            c.project_code,
+            cp.project_name,
+            cp.pm_account AS adm_account,
+            cp.pm_name AS adm_name,
+            cp.a_customer_id,
+            cp.a_customer_name,
+            cp.end_customer_id,
+            cp.end_customer_name
+        FROM
+            cbms.sys_cabinet c
+        JOIN geo.dc_mapping dm ON dm.id = c.dc_id
+        LEFT JOIN geo.room r ON r.id = c.room_id AND r.is_delete = 0
+        LEFT JOIN cip.cip_project cp ON cp.project_code = c.project_code
+        WHERE
+            c.`status` = 1
+            AND c.cabinet_id IN
+        <foreach collection="cabinetIds" item="cabinetId" open="(" separator="," close=")">
+            #{cabinetId}
+        </foreach>
+    </select>
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.CabinetSafeCapacityInitMapper">\n    <select id="fetchAsymCabinets" resultType="java.lang.Integer">\n        SELECT\n            ca.cabinet_id\n        FROM\n            cbms.sys_cabinet c\n        JOIN\n            cbms.sys_cabinet_attr ca ON ca.cabinet_id = c.cabinet_id\n        WHERE\n            c.dc_id = #{dcId}\n            AND c.status = 1\n        GROUP BY\n            ca.cabinet_id\n        HAVING\n            COUNT(DISTINCT elec_sn) = COUNT(*); -- Number of power supply paths = Number of power supply lines, i.e., all paths are single-path power supply\n    </select>\n    <select id="fetchCabinetAttrs" resultType="com.gds.jpi.dcim.response.CabinetAttrValueResponse">\n        SELECT\n            c.cabinet_id,\n            ca.rel_id,\n            ca.status,\n            ca.elec_sn,\n            ca.elec_type,\n            ca.device_id,\n            d.name AS device_name,\n            d.asset_type_id,\n            at.name AS asset_type_name,\n            at.code AS asset_type_code,\n            ca.branch,\n            ca.safe_elec_amp,\n            ca.amp_attr_id,\n            da_amp.tag_id AS amp_tag_id,\n            ca.kw_attr_id,\n            da_kw.tag_id AS kw_tag_id\n        FROM\n            cbms.sys_cabinet c\n        JOIN\n            cbms.sys_cabinet_attr ca ON ca.cabinet_id = c.cabinet_id\n        LEFT JOIN\n            cbms.sys_device d ON d.device_id = ca.device_id AND d.status = 1\n        LEFT JOIN\n            asset.asset_type at ON at.id = d.asset_type_id\n        LEFT JOIN\n            cbms.sys_device_attr da_amp ON da_amp.sys_attr_id = ca.amp_attr_id\n        LEFT JOIN\n            cbms.sys_device_attr da_kw ON da_kw.sys_attr_id = ca.kw_attr_id\n        WHERE\n            c.dc_id = #{dcId}\n            AND c.status = 1\n            AND c.elec_status = 1\n    </select>\n    <select id="fetchThreePhaseAttrs" resultType="com.gds.jpi.dcim.response.ThreePhaseAttrResponse">\n        SELECT\n            ca.rel_id,\n            ta.code AS temp_attr_code,\n            da.sys_attr_id\n        FROM\n            cbms.sys_cabinet_attr ca\n        JOIN\n            dcim.std_temp_attr ta ON ta.is_del = 0 AND ta.code IN\n        <foreach collection="codes" item="code" open="(" separator="," close=")">\n            #{code}\n        </foreach>\n        JOIN\n            cbms.sys_device_attr da ON da.device_id = ca.device_id AND da.seq = ca.branch AND da.temp_attr_id = ta.temp_attr_id\n        WHERE\n            ca.rel_id IN\n            <foreach collection="relIds" item="relId" open="(" separator="," close=")">\n                #{relId}\n            </foreach>\n    </select>\n    <select id="fetchCabinetInfo" resultType="com.gds.jpi.dcim.model.sharding.CabinetSafeCapacity">\n        SELECT\n            c.dc_id,\n            dm.dc_name_inner_short AS dc_name,\n            c.room_id,\n            r.name AS room_name,\n            c.cabinet_id,\n            c.name AS cabinet_name,\n            c.project_code,\n            cp.project_name,\n            cp.pm_account AS adm_account,\n            cp.pm_name AS adm_name,\n            cp.a_customer_id,\n            cp.a_customer_name,\n            cp.end_customer_id,\n            cp.end_customer_name\n        FROM\n            cbms.sys_cabinet c\n        JOIN geo.dc_mapping dm ON dm.id = c.dc_id\n        LEFT JOIN geo.room r ON r.id = c.room_id AND r.is_delete = 0\n        LEFT JOIN cip.cip_project cp ON cp.project_code = c.project_code\n        WHERE\n            c.status = 1\n            AND c.cabinet_id IN\n        <foreach collection="cabinetIds" item="cabinetId" open="(" separator="," close=")">\n            #{cabinetId}\n        </foreach>\n    </select>\n</mapper>",
+"details": [
+{
+"lineNumber": 17,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "-- 配电路数 = 配电条数，即所有路都是单路配电的",
+"translatedText": "-- Number of power supply paths = Number of power supply lines, i.e., all paths are single-path power supply"
+}
+]
+}
+```
+
+### DEMOS11
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.LocationMapper">
+
+    <select id="selectByDc" resultType="com.gds.jpi.dcim.model.GeoLocation">
+        SELECT a.*
+        FROM geo.location a
+        LEFT JOIN geo.dc_location b on a.id = b.location_id
+        LEFT JOIN geo.dc_mapping c on b.dc_id = c.id
+        WHERE a.status = 1
+        AND c.id = #{dcId}
+    </select>
+
+    <select id="searchAllChildLocations" resultType="com.gds.jpi.dcim.model.GeoLocation">
+        select a.*
+        from geo.location a
+        where a.status = 1 and
+        <foreach collection="list" item="location" open=" (" close=")" separator="or">
+            ( a.`left` <![CDATA[ >= ]]>  #{location.left} and a.`right` <![CDATA[ <= ]]> #{location.right} )
+        </foreach>
+        order by a.`left`
+    </select>
+    <select id="getGeoRoomById" resultType="com.gds.jpi.dcim.model.GeoRoom">
+        SELECT * FROM geo.room WHERE id = #{roomId}
+    </select>
+    <select id="fetchColdTemperature" resultType="com.gds.jpi.dcim.vo.event.LocDeviceAttrRsp">
+        SELECT
+            sd.location_id,
+            sd.device_id,
+            sd.`name` AS device_name,
+            da.sys_attr_id
+        FROM
+            cbms.sys_device sd
+        JOIN
+            asset.asset_type t ON t.id = sd.asset_type_id AND t.`code` = 'THSEN' -- 温湿度传感器
+        JOIN
+            dcim.std_temp_prop tp ON tp.`code` = 'PROP_THSEN_POS' -- 温湿度位置属性
+        JOIN
+            cbms.sys_device_prop p ON p.device_id = sd.device_id AND p.temp_prop_id = tp.temp_prop_id AND p.value = 1 -- 温湿度位置属性 = 冷通道
+        JOIN
+            dcim.std_temp_attr ta ON ta.code = 'ATTR_THSEN_TEMPERATURE' -- 温度测点
+        JOIN
+            cbms.sys_device_attr da ON da.device_id = sd.device_id AND da.temp_attr_id = ta.temp_attr_id
+        WHERE
+            sd.is_monitoring = 1 -- 有监控
+            AND sd.status = 1
+            AND sd.location_id = #{id}
+    </select>
+    <select id="fetchLocationAllChild" resultType="com.gds.jpi.dcim.vo.geo.LocationChildVO">
+        SELECT
+            l.id AS location_id,
+            lc.id AS child_id
+        FROM
+            geo.location l
+        JOIN
+            geo.location lc ON lc.`left` &gt;= l.`left` AND lc.`right` &lt;= l.`right` AND lc.`status` = 1
+        WHERE
+            l.`status` = 1
+            AND l.id IN
+        <foreach collection="locationIds" item="locId" open="(" separator="," close=")">
+            #{locId}
+        </foreach>
+    </select>
+    <select id="selectByDcAndType" resultType="com.gds.jpi.dcim.model.GeoLocation">
+        SELECT
+            l.id,
+            l.name,
+            l.sp_type,
+            l.path
+        from
+            geo.dc_location dl
+        JOIN
+            geo.location lp ON lp.id = dl.location_id
+        JOIN
+            geo.location l ON l.`left` &gt;= lp.`left` AND l.`right` &lt;= lp.`right` AND l.`status` = 1
+        where
+            dc_id = #{dcId}
+            AND l.sp_type = #{locationTypeId};
+    </select>
+</mapper>
+```
+
+#### Output:
+
+```json
+</select>
+</mapper>
+{
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.LocationMapper">\n\n    <select id="selectByDc" resultType="com.gds.jpi.dcim.model.GeoLocation">\n        SELECT a.\n        FROM geo.location a\n        LEFT JOIN geo.dc_location b on a.id = b.location_id\n        LEFT JOIN geo.dc_mapping c on b.dc_id = c.id\n        WHERE a.status = 1\n        AND c.id = #{dcId}\n    </select>\n\n    <select id="searchAllChildLocations" resultType="com.gds.jpi.dcim.model.GeoLocation">\n        select a.\n        from geo.location a\n        where a.status = 1 and\n        <foreach collection="list" item="location" open=" (" close=")" separator="or">\n            ( a.left >=  #{location.left} and a.right <= #{location.right} )\n        </foreach>\n        order by a.left\n    </select>\n\n    <select id="getGeoRoomById" resultType="com.gds.jpi.dcim.model.GeoRoom">\n        SELECT * FROM geo.room WHERE id = #{roomId}\n    </select>\n\n    <select id="fetchColdTemperature" resultType="com.gds.jpi.dcim.vo.event.LocDeviceAttrRsp">\n        SELECT\n            sd.location_id,\n            sd.device_id,\n            sd.name AS device_name,\n            da.sys_attr_id\n        FROM\n            cbms.sys_device sd\n        JOIN\n            asset.asset_type t ON t.id = sd.asset_type_id AND t.code = 'THSEN' -- Temperature and Humidity Sensor\n        JOIN\n            dcim.std_temp_prop tp ON tp.code = 'PROP_THSEN_POS' -- Temperature and Humidity Position Property\n        JOIN\n            cbms.sys_device_prop p ON p.device_id = sd.device_id AND p.temp_prop_id = tp.temp_prop_id AND p.value = 1 -- Temperature and Humidity Position Property = Cold Aisle\n        JOIN\n            dcim.std_temp_attr ta ON ta.code = 'ATTR_THSEN_TEMPERATURE' -- Temperature Measurement Point\n        JOIN\n            cbms.sys_device_attr da ON da.device_id = sd.device_id AND da.temp_attr_id = ta.temp_attr_id\n        WHERE\n            sd.is_monitoring = 1 -- Monitored\n            AND sd.status = 1\n            AND sd.location_id = #{id}\n    </select>\n\n    <select id="fetchLocationAllChild" resultType="com.gds.jpi.dcim.vo.geo.LocationChildVO">\n        SELECT\n            l.id AS location_id,\n            lc.id AS child_id\n        FROM\n            geo.location l\n        JOIN\n            geo.location lc ON lc.left >= l.left AND lc.right <= l.right AND lc.status = 1\n        WHERE\n            l.status = 1\n            AND l.id IN\n        <foreach collection="locationIds" item="locId" open="(" separator="," close=")">\n            #{locId}\n        </foreach>\n    </select>\n\n    <select id="selectByDcAndType" resultType="com.gds.jpi.dcim.model.GeoLocation">\n        SELECT\n            l.id,\n            l.name,\n            l.sp_type,\n            l.path\n        from\n            geo.dc_location dl\n        JOIN\n            geo.location lp ON lp.id = dl.location_id\n        JOIN\n            geo.location l ON l.left >= lp.left AND l.right <= lp.right AND l.status = 1\n        where\n            dc_id = #{dcId}\n            AND l.sp_type = #{locationTypeId};\n    </select>\n\n</mapper>",
+"details": [
+{
+"lineNumber": 43,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "-- 温湿度传感器",
+"translatedText": "-- Temperature and Humidity Sensor"
+},
+{
+"lineNumber": 45,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "-- 温湿度位置属性",
+"translatedText": "-- Temperature and Humidity Position Property"
+},
+{
+"lineNumber": 47,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "-- 温湿度位置属性 = 冷通道",
+"translatedText": "-- Temperature and Humidity Position Property = Cold Aisle"
+},
+{
+"lineNumber": 49,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "-- 温度测点",
+"translatedText": "-- Temperature Measurement Point"
+},
+{
+"lineNumber": 51,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "-- 有监控",
+"translatedText": "-- Monitored"
+}
+]
+}
+```
