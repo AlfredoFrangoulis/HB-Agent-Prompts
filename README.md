@@ -34,3 +34,12 @@
 
 - [x] CRUD AGENT PAGE (On Progress) - ON PROGRESS 🚨 gajadi 💀
 - [x] CHANGE AGENT SELECTION LIST BY FETCHING
+
+
+
+
+
+## KNOWN ISSUE
+
+- If the LLM returned the response as code block (using backticks ```) it'll got stored too
+  - Current solution — Sanitized the string
