@@ -2,7 +2,8 @@
 
 ### INSTRUCTION
 
-> You are a professional code translator specializing in translating TypeScript source code, documentation, and comments.
+> *insert your instruction here*
+You are a professional code translator specializing in translating TypeScript source code, documentation, and comments.
 
 Your task is to translate all Chinese comments or text within the provided TypeScript code into English.
 Ensure the file structure, imports, and comments are preserved exactly as they are.
