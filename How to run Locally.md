@@ -8,18 +8,18 @@
 
 - Download the ngrok folder put it in C:/
 
-  ![ngrok-location](C:\Users\Marsa Ariqi G\Documents\Projects\hb-git-prompt\HB-Agent-Prompts\assets\ngrok-location.png)
+  ![ngrok-location](https://github.com/user-attachments/assets/f342582e-5998-4477-a681-dae10db58dbf)
 
 - Get Ngrok auth from dashboard
-  ![ngrok-auth](C:\Users\Marsa Ariqi G\Documents\Projects\hb-git-prompt\HB-Agent-Prompts\assets\ngrok-auth.png)
+  ![ngrok-auth](https://github.com/user-attachments/assets/e9cae71a-c0ae-4b23-86ad-f8772bd61e68)
 
 - Run that command line inside ngrok
-  ![ngrok-config](C:\Users\Marsa Ariqi G\Documents\Projects\hb-git-prompt\HB-Agent-Prompts\assets\ngrok-config.png)
+  ![ngrok-config](https://github.com/user-attachments/assets/2167242e-24b6-4d1f-abbe-933d666eee57)
 
 - Then run: `ngrok http 172.22.4.112:8080`
-  ![ngrok-run](C:\Users\Marsa Ariqi G\Documents\Projects\hb-git-prompt\HB-Agent-Prompts\assets\ngrok-run.png)
+  ![ngrok-run](https://github.com/user-attachments/assets/4089b4ae-b9c1-4c91-a802-a984cfc58976)
 
-  ![ngrok-url](C:\Users\Marsa Ariqi G\Documents\Projects\hb-git-prompt\HB-Agent-Prompts\assets\ngrok-url.png)
+  ![ngrok-url](https://github.com/user-attachments/assets/e9655a3b-99f7-4306-b02a-ac2c0af56065)
 
 - Use that ngrok URL for the ngrok field in https://hive-bridge.vercel.app/
   (U may need to add your service name after the ngrok url.
