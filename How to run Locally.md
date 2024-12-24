@@ -6,6 +6,9 @@
 
 - Request the repository access by sending your github email address to Azka
 - Create ur own branch and service ;D
+- Try to tweak this function to process ur file type (maybe theres some escape character or sumn)
+  ![image](https://github.com/user-attachments/assets/bfc89671-b781-4222-8a3d-0800bab7460c)
+
 
 ### Ngrok **—** https://dashboard.ngrok.com/get-started/setup/windows
 
