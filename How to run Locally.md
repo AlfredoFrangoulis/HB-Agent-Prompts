@@ -2,6 +2,11 @@
 
 ## Requirement
 
+### HZERO Source code
+
+- Request the repository access by sending your github email address to Azka
+- Create ur own branch and service ;D
+
 ### Ngrok **—** https://dashboard.ngrok.com/get-started/setup/windows
 
 - Create Account
@@ -26,10 +31,3 @@
   e.g. https://dc95-103-118-101-82.ngrok-free.app/hive-bridge/v1/0)
 
 
-
-
-
-### HZERO Source code
-
-- Request the repository access by sending your github email address to Azka
-- Create ur own branch ;D
