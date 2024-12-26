@@ -13,7 +13,7 @@
   - HZERO
 - FRONTEND
   - https://hive-bridge.vercel.app/
-  - NEXT JS (_TEMPORARY FOR DEVELOPMENT_)
+    - NEXT JS (_TEMPORARY FOR DEVELOPMENT_)
 
 ## TODO
 
@@ -39,16 +39,15 @@
 - [x] CHANGE AGENT SELECTION LIST BY FETCHING
 - [x] Session Storage to store Token and Ngrok url
 
-
-
-
-
 ## KNOWN ISSUE
 
 - If the LLM returned the response as code block (using backticks ```) it'll got stored too
 
-  > *java.lang.RuntimeException: Translation failed: Unexpected character ('`' (code 96)): expected a valid value (number, String, array, object, 'true', 'false' or 'null')*
+  > _java.lang.RuntimeException: Translation failed: Unexpected character ('`' (code 96)): expected a valid value (number, String, array, object, 'true', 'false' or 'null')_
 
-  - Current solution 
-    - Add prompt condition — e.g. `Ensure the line numbers in "details" align exactly with the original input file (do not add new line). Do not include markdown formatting (e.g., ```json) in the response. Return the JSON as plain text.`
-    -  Sanitized the string
+  - Current solution
+    - Add prompt condition — e.g. ` Ensure the line numbers in "details" align exactly with the original input file (do not add new line). Do not include markdown formatting (e.g., ```json) in the response. Return the JSON as plain text. `
+    - Sanitized the string
+
+- Cannot connect to https://hive-bridge.vercel.app/ while using Forticlient VPN
+  - Change ur browser DNS to a custom one (Cloudflare 1.1.1.1 works)
