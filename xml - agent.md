@@ -1725,55 +1725,8 @@ Keep entities like &gt;, &lt;, &amp;, &lt;=, &gt;= and symbols such as backticks
 #### Output:
 
 ```json
-{
-"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.alarmhandlercenter.mapper.AlarmCallbackMapper">\n <select id="findSubscribeByAlarmDc"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail">\n SELECT r.id AS record_id,\n r.business_code,\n r.business_guid,\n b.callback_url\n FROM dcim.alarm_subscribe_dc d\n JOIN\n dcim.alarm_subscribe_record r ON r.id = d.record_id AND r.`status` = 1 AND r.type_id = 2\n JOIN\n dcim.alarm_subscribe_event_type t ON t.record_id = r.id\n JOIN\n dcim.alarm_subscribe_business b ON b.business_code = r.business_code\n WHERE d.dc_id = #{alarm.dcId}\n AND t.event_type_id = #{alarm.eventTypeId}\n <if test="emergencyFlag">\n AND b.emergency_callback = 1\n </if>\n </select>\n <select id="findSubscribeByLabel"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail">\n SELECT\n DISTINCT\n r.id AS record_id,\n r.business_code,\n r.business_guid,\n b.callback_url\n FROM\n dcim.alarm_subscribe_dc d\n JOIN\n dcim.alarm_subscribe_record r ON r.id = d.record_id AND r.`status` = 1 AND r.type_id = 3\n JOIN\n dcim.alarm_subscribe_event_type t ON t.record_id = r.id\n JOIN\n dcim.alarm_subscribe_event_label l ON l.record_id = r.id\n JOIN\n dcim.alarm_subscribe_business b ON b.business_code = r.business_code\n JOIN\n dcim.std_temp_event_label_rel re ON re.temp_event_id = #{alarm.tempEventId} AND l.event_label_id = re.event_label_id\n WHERE\n d.dc_id = #{alarm.dcId}\n AND t.event_type_id = #{alarm.eventTypeId}\n <if test="emergencyFlag">\n AND b.emergency_callback = 1\n </if>\n </select>\n <select id="findSubscribeByAlarmTarget"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail">\n SELECT r.id AS record_id,\n r.business_code,\n r.business_guid,\n b.callback_url\n FROM dcim.alarm_subscribe_event_target d\n JOIN\n dcim.alarm_subscribe_record r ON r.id = d.record_id AND r.`status` = 1 AND r.type_id = 1\n JOIN\n dcim.alarm_subscribe_event_type t ON t.record_id = r.id\n JOIN\n dcim.alarm_subscribe_business b ON b.business_code = r.business_code\n WHERE d.event_target_category_id = #{alarm.eventTargetCategoryId}\n AND d.event_target_inst_id = #{alarm.eventTargetInstId}\n AND d.temp_event_id IN (0, #{alarm.tempEventId})\n AND t.event_type_id = #{alarm.eventTypeId}\n <if test="emergencyFlag">\n AND b.emergency_callback = 1\n </if>\n </select>\n <select id="selectAlarmDetail"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmCallbackAlarmDetail">\n SELECT\n a.id AS alarm_id,\n a.alarm_content,\n a.event_id,\n a.event_target_category_id,\n dtc.code AS event_target_category_code,\n dtc.name AS event_target_category_name,\n a.event_target_type_id,\n a.event_target_type_name,\n a.event_target_inst_id,\n a.event_target_inst_name,\n a.seq,\n a.temp_event_id,\n a.temp_event_name,\n a.event_name,\n a.dc_id,\n a.dc_name,\n a.location_id,\n a.location_name,\n a.event_level_id,\n dl.code AS event_level_code,\n dl.name AS event_level_name,\n a.major_id,\n m.code AS major_code,\n m.name AS major_name,\n a.event_type_id,\n et.code AS event_type_code,\n et.name AS event_type_name,\n a.message_type AS message_type_id,\n mt.code AS message_type_code,\n mt.name AS message_type_name,\n a.recover_flag,\n a.simulate_flag,\n a.execute_id,\n a.break_time,\n a.update_time\n FROM\n dcim.alarm_act a\n JOIN\n dcim.dict_event_target_category dtc ON dtc.id = a.event_target_category_id\n JOIN\n dcim.dict_event_level dl ON dl.id = a.event_level_id\n JOIN\n dcim.dict_major m ON m.id = a.major_id\n JOIN\n dcim.dict_event_type et ON et.id = a.event_type_id\n JOIN\n dcim.dict_alarm_message_type mt ON mt.id = a.message_type\n WHERE\n a.id IN\n <foreach collection="alarmIds" item="alarmId" open="(" separator="," close=")">\n #{alarmId}\n </foreach>\n </select>\n <select id="findCallbackRetry"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail">\n SELECT l.record_id,\n r.business_code,\n l.business_guid,\n b.callback_url,\n l.id AS log_id,\n l.retry,\n l.alarm_id\n FROM dcim.alarm_subscribe_callback_log l\n JOIN\n dcim.alarm_subscribe_record r ON l.record_id = r.id AND r.status = 1\n JOIN\n dcim.alarm_subscribe_business b ON b.business_code = r.business_code\n WHERE l.create_time > #{date}\n AND l.retry < 10\n AND l.status = 1\n </select>\n</mapper>",
-{
-  "details": [
-    {
-      "lineNumber": 1,
-      "lineType": "annotation",
-      "jobType": "Text Translation",
-      "originalText": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-      "translatedText": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-    },
-    {
-      "lineNumber": 2,
-      "lineType": "annotation",
-      "jobType": "Text Translation",
-      "originalText": "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">",
-      "translatedText": "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">"
-    },
-    {
-      "lineNumber": 3,
-      "lineType": "comment",
-      "jobType": "Text Translation",
-      "originalText": "<mapper namespace=\"com.gds.jpi.dcim.core.alarmhandlercenter.mapper.AlarmCallbackMapper\">",
-      "translatedText": "<mapper namespace=\"com.gds.jpi.dcim.core.alarmhandlercenter.mapper.AlarmCallbackMapper\">"
-    },
-    {
-      "lineNumber": 4,
-      "lineType": "comment",
-      "jobType": "Text Translation",
-      "originalText": " <select id=\"findSubscribeByAlarmDc\"",
-      "translatedText": " <select id=\"findSubscribeByAlarmDc\""
-    },
-    {
-      "lineNumber": 5,
-      "lineType": "comment",
-      "jobType": "Text Translation",
-      "originalText": " resultType=\"com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail\">",
-      "translatedText": " resultType=\"com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail\">"
-    },
-    {
-      "lineNumber": 6,
-      "lineType": "comment",
-      "jobType": "Text Translation",
-      "originalText": " SELECT r.id AS record_id,",
-      "translatedText": " SELECT r.id AS record_id,"
-    }
-  ]
-}
-}
+{ 
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.alarmhandlercenter.mapper.AlarmCallbackMapper">\n <select id="findSubscribeByAlarmDc"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail">\n SELECT r.id AS record_id,\n r.business_code,\n r.business_guid,\n b.callback_url\n FROM dcim.alarm_subscribe_dc d\n JOIN\n dcim.alarm_subscribe_record r ON r.id = d.record_id AND r.`status` = 1 AND r.type_id = 2\n JOIN\n dcim.alarm_subscribe_event_type t ON t.record_id = r.id\n JOIN\n dcim.alarm_subscribe_business b ON b.business_code = r.business_code\n WHERE d.dc_id = #{alarm.dcId}\n AND t.event_type_id = #{alarm.eventTypeId}\n <if test="emergencyFlag">\n AND b.emergency_callback = 1\n </if>\n </select>\n <select id="findSubscribeByLabel"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail">\n SELECT\n DISTINCT\n r.id AS record_id,\n r.business_code,\n r.business_guid,\n b.callback_url\n FROM\n dcim.alarm_subscribe_dc d\n JOIN\n dcim.alarm_subscribe_record r ON r.id = d.record_id AND r.`status` = 1 AND r.type_id = 3\n JOIN\n dcim.alarm_subscribe_event_type t ON t.record_id = r.id\n JOIN\n dcim.alarm_subscribe_event_label l ON l.record_id = r.id\n JOIN\n dcim.alarm_subscribe_business b ON b.business_code = r.business_code\n JOIN\n dcim.std_temp_event_label_rel re ON re.temp_event_id = #{alarm.tempEventId} AND l.event_label_id = re.event_label_id\n WHERE\n d.dc_id = #{alarm.dcId}\n AND t.event_type_id = #{alarm.eventTypeId}\n <if test="emergencyFlag">\n AND b.emergency_callback = 1\n </if>\n </select>\n <select id="findSubscribeByAlarmTarget"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail">\n SELECT r.id AS record_id,\n r.business_code,\n r.business_guid,\n b.callback_url\n FROM dcim.alarm_subscribe_event_target d\n JOIN\n dcim.alarm_subscribe_record r ON r.id = d.record_id AND r.`status` = 1 AND r.type_id = 1\n JOIN\n dcim.alarm_subscribe_event_type t ON t.record_id = r.id\n JOIN\n dcim.alarm_subscribe_business b ON b.business_code = r.business_code\n WHERE d.event_target_category_id = #{alarm.eventTargetCategoryId}\n AND d.event_target_inst_id = #{alarm.eventTargetInstId}\n AND d.temp_event_id IN (0, #{alarm.tempEventId})\n AND t.event_type_id = #{alarm.eventTypeId}\n <if test="emergencyFlag">\n AND b.emergency_callback = 1\n </if>\n </select>\n <select id="selectAlarmDetail"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmCallbackAlarmDetail">\n SELECT\n a.id AS alarm_id,\n a.alarm_content,\n a.event_id,\n a.event_target_category_id,\n dtc.code AS event_target_category_code,\n dtc.name AS event_target_category_name,\n a.event_target_type_id,\n a.event_target_type_name,\n a.event_target_inst_id,\n a.event_target_inst_name,\n a.seq,\n a.temp_event_id,\n a.temp_event_name,\n a.event_name,\n a.dc_id,\n a.dc_name,\n a.location_id,\n a.location_name,\n a.event_level_id,\n dl.code AS event_level_code,\n dl.name AS event_level_name,\n a.major_id,\n m.code AS major_code,\n m.name AS major_name,\n a.event_type_id,\n et.code AS event_type_code,\n et.name AS event_type_name,\n a.message_type AS message_type_id,\n mt.code AS message_type_code,\n mt.name AS message_type_name,\n a.recover_flag,\n a.simulate_flag,\n a.execute_id,\n a.break_time,\n a.update_time\n FROM\n dcim.alarm_act a\n JOIN\n dcim.dict_event_target_category dtc ON dtc.id = a.event_target_category_id\n JOIN\n dcim.dict_event_level dl ON dl.id = a.event_level_id\n JOIN\n dcim.dict_major m ON m.id = a.major_id\n JOIN\n dcim.dict_event_type et ON et.id = a.event_type_id\n JOIN\n dcim.dict_alarm_message_type mt ON mt.id = a.message_type\n WHERE\n a.id IN\n <foreach collection="alarmIds" item="alarmId" open="(" separator="," close=")">\n #{alarmId}\n </foreach>\n </select>\n <select id="findCallbackRetry"\n resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.AlarmSubscribeDetail">\n SELECT l.record_id,\n r.business_code,\n l.business_guid,\n b.callback_url,\n l.id AS log_id,\n l.retry,\n l.alarm_id\n FROM dcim.alarm_subscribe_callback_log l\n JOIN\n dcim.alarm_subscribe_record r ON l.record_id = r.id AND r.status = 1\n JOIN\n dcim.alarm_subscribe_business b ON b.business_code = r.business_code\n WHERE l.create_time &gt; #{date}\n AND l.retry &lt; 10\n AND l.status = 1\n </select>\n</mapper>", "details": [] }
 ```
 
 ### DEMOS6
