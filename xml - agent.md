@@ -1771,17 +1771,16 @@ Keep entities like &gt;, &lt;, &amp;, &lt;=, &gt;= and symbols such as backticks
 
 ```json
 {
-"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.SysCabinetLogDetailMapper">\n\n\n <!--Query using an entity as the filter criteria-->\n <select id="findList" resultType="com.gds.jpi.dcim.vo.CabinetLogDetailVo">\n SELECT\n detail.`id`,\n detail.`log_id`,\n detail.`field_code`,\n mapping.`name` AS field_name,\n detail.`before`,\n detail.`after`,\n mapping.`is_show`\n FROM cbms.sys_cabinet_log_detail detail\n LEFT JOIN cbms.sys_field_mapping mapping ON detail.`field_code` = mapping.`code` AND mapping.`biz_belong` = 'CABINET'\n <where>\n <if test="logId != null">\n AND detail.`log_id` = #{logId}\n </if>\n <if test="logIds != null and logIds.size() > 0">\n AND detail.`log_id` IN\n <foreach collection="logIds" open="(" close=")" separator="," item="item">\n #{item}\n </foreach>\n </if>\n </where>\n </select>\n\n</mapper>",
-"details":
-    [
-        {
-        "lineNumber": 5,
-        "lineType": "comment",
-        "jobType": "Text Translation",
-        "originalText": "通过实体作为筛选条件查询",
-        "translatedText": "Query using an entity as the filter criteria"
-        }
-    ]
+  "translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace=\"com.gds.jpi.dcim.core.mapper.SysCabinetLogDetailMapper\">\n\n  <!--Query using an entity as the filter criteria-->\n  <select id=\"findList\" resultType=\"com.gds.jpi.dcim.vo.CabinetLogDetailVo\">\n    SELECT\n      detail.`id`,\n      detail.`log_id`,\n      detail.`field_code`,\n      mapping.`name` AS field_name,\n      detail.`before`,\n      detail.`after`,\n      mapping.`is_show`\n    FROM cbms.sys_cabinet_log_detail detail\n    LEFT JOIN cbms.sys_field_mapping mapping ON detail.`field_code` = mapping.`code` AND mapping.`biz_belong` = 'CABINET'\n    <where>\n      <if test=\"logId != null\">\n        AND detail.`log_id` = #{logId}\n      </if>\n      <if test=\"logIds != null and logIds.size() > 0\">\n        AND detail.`log_id` IN\n        <foreach collection=\"logIds\" open=\"(\" close=\")\" separator=\",\" item=\"item\">\n          #{item}\n        </foreach>\n      </if>\n    </where>\n  </select>\n\n</mapper>",
+  "details": [
+    {
+      "lineNumber": 5,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "通过实体作为筛选条件查询",
+      "translatedText": "Query using an entity as the filter criteria"
+    }
+  ]
 }
 
 ```
@@ -4183,4 +4182,1287 @@ Keep entities like &gt;, &lt;, &amp;, &lt;=, &gt;= and symbols such as backticks
     }
   ]
 }
+```
+
+### DEMOS13
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.SysCabinetAttrMapper">
+
+    <resultMap type="com.gds.jpi.dcim.model.SysCabinetAttr" id="SysCabinetAttrMap">
+        <result property="relId" column="rel_id" jdbcType="INTEGER"/>
+        <result property="cabinetId" column="cabinet_id" jdbcType="INTEGER"/>
+        <result property="deviceId" column="device_id" jdbcType="INTEGER"/>
+        <result property="elecType" column="elec_type" jdbcType="INTEGER"/>
+        <result property="elecSn" column="elec_sn" jdbcType="INTEGER"/>
+        <result property="branch" column="branch" jdbcType="INTEGER"/>
+        <result property="kwhAttrId" column="kwh_attr_id" jdbcType="INTEGER"/>
+        <result property="kwAttrId" column="kw_attr_id" jdbcType="INTEGER"/>
+        <result property="ampAttrId" column="amp_attr_id" jdbcType="INTEGER"/>
+        <result property="swithAttrId" column="swith_attr_id" jdbcType="INTEGER"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="safeElecAmp" column="safe_elec_amp" jdbcType="NUMERIC"/>
+        <result property="elecUpdateTime" column="elec_update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="allColumn">`rel_id`, `cabinet_id`, `device_id`, `elec_type`, `elec_sn`, `branch`, `kwh_attr_id`, `kw_attr_id`, `amp_attr_id`, `swith_attr_id`, `status`, `safe_elec_amp`, `elec_update_time`</sql>
+    <sql id="noIdColumn">`cabinet_id`, `device_id`, `elec_type`, `elec_sn`, `branch`, `kwh_attr_id`, `kw_attr_id`, `amp_attr_id`, `swith_attr_id`, `status`, `safe_elec_amp`, `elec_update_time`</sql>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="findSysCabinetAttrList" resultType="com.gds.jpi.dcim.vo.CabinetAttrVo">
+        SELECT
+        ct.`rel_id`,
+        ct.`cabinet_id`,
+        ct.`elec_sn`,
+        ct.`elec_type`,
+        ct.`branch`,
+        ct.`safe_elec_amp`,
+        ct.`status`,
+        ct.`device_id`,
+        ct.`kwh_attr_id`,
+        ct.`kw_attr_id`,
+        ct.`amp_attr_id`,
+        ct.`swith_attr_id`,
+
+        c.`name` cabinet_name,
+        d.`name` device_name,
+        d.`location_id`,
+        room_lo.`name` AS room_name,
+        d.`dc_id`,
+        dc.`dc_name_inner_full` dc_name
+        FROM
+        cbms.`sys_cabinet_attr` ct
+        LEFT JOIN cbms.sys_cabinet c ON ct.`cabinet_id` = c.`cabinet_id`
+        LEFT JOIN cbms.`sys_device` d ON ct.`device_id` = d.`device_id`
+        LEFT JOIN geo.dc_mapping dc ON d.dc_id = dc.id
+        LEFT JOIN geo.location room_lo ON d.location_id = room_lo.id
+        <where>
+            <if test="dcId != null">
+                AND c.`dc_id` = #{dcId}
+            </if>
+            <if test="cabinetId != null">
+                AND ct.`cabinet_id` = #{cabinetId}
+            </if>
+            <if test="cabinetIds != null and cabinetIds.size() > 0">
+                AND ct.`cabinet_id` IN
+                <foreach collection="cabinetIds" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="relId != null">
+                AND ct.`rel_id` = #{relId}
+            </if>
+            <if test="relIds != null and relIds.size() > 0">
+                AND ct.`rel_id` IN
+                <foreach collection="relIds" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!--通过主键删除-->
+    <delete id="batchRemove">
+        DELETE
+        FROM cbms.sys_cabinet_attr
+        WHERE `rel_id` IN
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="checkExist" resultType="boolean">
+        SELECT COUNT(0) > 0
+        FROM cbms.sys_cabinet_attr
+        WHERE
+        ((`device_id` = #{deviceId} AND `branch` = #{branch})
+        OR
+        (`cabinet_id` = #{cabinetId} AND `elec_sn` = #{elecSn} AND `elec_type` = #{elecType}))
+        <if test="relId != null">
+            AND `rel_id` != #{relId}
+        </if>
+    </select>
+
+    <select id="checkWoc" resultType="boolean">
+        SELECT COUNT(0) > 0
+        FROM woc.`woc_order_detail_opt` op
+        LEFT JOIN woc.woc_order wo ON op.orderId = wo.id
+        WHERE wo.status IN (0, 1)
+        <if test="cabinetId != null">
+            AND op.`cabinet_id` = #{cabinetId}
+        </if>
+        <if test="cabinetIds != null and cabinetIds.size() > 0">
+            AND op.`cabinet_id` IN
+            <foreach collection="cabinetIds" open="(" close=")" separator="," item="item">
+                #{item}
+            </foreach>
+        </if>
+        <if test="relIds != null and relIds.size() > 0">
+            AND op.`cabinet_id` IN
+            (
+                SELECT `cabinet_id` FROM cbms.sys_cabinet_attr WHERE `rel_id` IN
+                <foreach collection="relIds" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            )
+        </if>
+
+    </select>
+
+    <select id="findDeviceAttr" resultType="com.gds.jpi.dcim.vo.DeviceAttrVo">
+        SELECT `sys_attr_id`, `device_id`, `tag_id` FROM cbms.`sys_device_attr`
+        <where>
+            <if test="sysAttrIds != null and sysAttrIds.size() > 0" >
+                AND `tag_id` IS NOT NULL AND `sys_attr_id` IN
+                <foreach collection="sysAttrIds" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="findDeviceAttrByDc" resultType="com.gds.jpi.dcim.vo.DeviceAttrVo">
+        SELECT
+            t.device_id,
+            t.seq,
+            SUM(
+                CASE
+                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_CURRENT', 'ATTR_PDUDC_BRANCH_CURRENT', 'ATTR_PDUBUS_BRANCH_CURRENT') THEN 1
+                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_POWER', 'ATTR_PDUDC_BRANCH_POWER', 'ATTR_PDUBUS_BRANCH_POWER') THEN 2
+                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUDC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUBUS_BRANCH_POWER_CONSUMPTION') THEN 4
+                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_SWITCH_STATE', 'ATTR_PDUDC_BRANCH_SWITCH_STATE', 'ATTR_PDUBUS_BRANCH_SWITCH_STATE') THEN 8
+                    ELSE 0
+                END
+            ) AS num,
+            SUM(
+                CASE
+                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_CURRENT', 'ATTR_PDUDC_BRANCH_CURRENT', 'ATTR_PDUBUS_BRANCH_CURRENT') AND t.re >= 1 THEN 1
+                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_POWER', 'ATTR_PDUDC_BRANCH_POWER', 'ATTR_PDUBUS_BRANCH_POWER')  AND t.re >= 1 THEN 2
+                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUDC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUBUS_BRANCH_POWER_CONSUMPTION') AND t.re >= 1 THEN 4
+                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_SWITCH_STATE', 'ATTR_PDUDC_BRANCH_SWITCH_STATE', 'ATTR_PDUBUS_BRANCH_SWITCH_STATE')  AND t.re >= 1 THEN 8
+                    ELSE 0
+                END
+            ) AS `repeat`
+        FROM
+            (
+                SELECT -- 交流
+                    da.device_id,
+                    da.seq,
+                    da.temp_attr_id,
+                    sta.code as temp_attr_code,
+                    if(COUNT(0) > 1, 1, 0) AS re
+                FROM
+                    cbms.`sys_device_attr` da
+                JOIN cbms.`sys_device` d ON da.device_id = d.device_id
+                JOIN dcim.std_temp_attr sta on sta.temp_attr_id = da.temp_attr_id
+                JOIN asset.asset_type aat on aat.id = d.asset_type_id
+                WHERE
+                  da.seq IS NOT NULL
+                  AND sta.code IN ( 'ATTR_PDUAC_BRANCH_CURRENT', 'ATTR_PDUAC_BRANCH_POWER', 'ATTR_PDUAC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUAC_BRANCH_SWITCH_STATE' )
+                  AND aat.code = 'PDUAC'
+                  <if test="paramMap.dcId != null">
+                      AND d.dc_id = #{paramMap.dcId}
+                  </if>
+                  <if test="paramMap.deviceId != null">
+                    AND da.device_id = #{paramMap.deviceId}
+                  </if>
+                <if test="paramMap.branch != null">
+                    AND da.seq = #{paramMap.branch}
+                </if>
+                GROUP BY
+                    da.device_id, da.seq, sta.code
+                UNION ALL
+                SELECT -- 直流
+                    da.device_id,
+                    da.seq,
+                    da.temp_attr_id,
+                    sta.code as temp_attr_code,
+                    if(COUNT(0) > 1, 1, 0) AS re
+                FROM
+                    cbms.`sys_device_attr` da
+                JOIN cbms.`sys_device` d ON da.device_id = d.device_id
+                JOIN dcim.std_temp_attr sta on sta.temp_attr_id = da.temp_attr_id
+                JOIN asset.asset_type aat on aat.id = d.asset_type_id
+                WHERE
+                  da.seq IS NOT NULL
+                  AND sta.code IN ( 'ATTR_PDUDC_BRANCH_CURRENT', 'ATTR_PDUDC_BRANCH_POWER', 'ATTR_PDUDC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUDC_BRANCH_SWITCH_STATE' )
+                  AND aat.code = 'PDUDC'
+                  <if test="paramMap.dcId != null">
+                      AND d.dc_id = #{paramMap.dcId}
+                  </if>
+                  <if test="paramMap.deviceId != null">
+                    AND da.device_id = #{paramMap.deviceId}
+                  </if>
+                <if test="paramMap.branch != null">
+                    AND da.seq = #{paramMap.branch}
+                </if>
+                GROUP BY
+                    da.device_id, da.seq, sta.code
+                UNION ALL
+                SELECT -- 小母线
+                    da.device_id,
+                    da.seq,
+                    da.temp_attr_id,
+                    sta.code as temp_attr_code,
+                    if(COUNT(0) > 1, 1, 0) AS re
+                FROM
+                    cbms.`sys_device_attr` da
+                JOIN cbms.`sys_device` d ON da.device_id = d.device_id
+                JOIN dcim.std_temp_attr sta on sta.temp_attr_id = da.temp_attr_id
+                JOIN asset.asset_type aat on aat.id = d.asset_type_id
+                WHERE
+                    da.seq IS NOT NULL
+                    AND sta.code IN ( 'ATTR_PDUBUS_BRANCH_CURRENT', 'ATTR_PDUBUS_BRANCH_POWER', 'ATTR_PDUBUS_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUBUS_BRANCH_SWITCH_STATE' )
+                    AND aat.code = 'PDUBUS'
+                    <if test="paramMap.dcId != null">
+                        AND d.dc_id = #{paramMap.dcId}
+                    </if>
+                    <if test="paramMap.deviceId != null">
+                        AND da.device_id = #{paramMap.deviceId}
+                    </if>
+                    <if test="paramMap.branch != null">
+                        AND da.seq = #{paramMap.branch}
+                    </if>
+                GROUP BY
+                da.device_id, da.seq, sta.code
+        ) AS t
+        GROUP BY t.device_id, t.seq
+    </select>
+
+    <select id="findDeviceBranchNum" resultType="com.gds.jpi.dcim.vo.DeviceAttrVo">
+        SELECT
+            d.device_id,
+            ROUND( `data`.`value`, 0 ) AS `num`
+        FROM
+            cbms.sys_device d
+            JOIN cbms.sys_device_prop `data` ON `data`.device_id = d.device_id
+            JOIN dcim.std_temp_prop temp ON temp.temp_prop_id = `data`.temp_prop_id
+        WHERE
+            d.STATUS = 1
+          AND d.`is_monitoring` = 1
+          AND temp.`is_del` = 0
+          AND `value` IS NOT NULL
+          AND temp.`code` IN ('PROP_PDUAC_BRANCH_COUNT', 'PROP_PDUDC_BRANCH_COUNT')
+          AND d.dc_id = #{dcId}
+        ORDER BY  d.device_id
+    </select>
+
+    <select id="findCabinetAttrDevice" resultType="com.gds.jpi.dcim.vo.CabinetAttrDeviceVo">
+        SELECT
+            REPLACE(IFNULL(d.`name`, ''), ' ', '') as deviceName,
+            d.device_id,
+            l.`name` as roomName,
+            r.id as roomId,
+            m.dc_name_inner_full as dcName
+        FROM
+            cbms.`sys_device` d
+            LEFT JOIN geo.`location` l ON d.location_id = l.id
+            LEFT JOIN geo.`dc_mapping` m ON d.dc_id = m.id
+            LEFT JOIN geo.room r ON d.location_id = r.location_id
+            LEFT JOIN asset.asset_type aat ON aat.id = d.asset_type_id
+        WHERE
+         d.`status` = 1 AND r.is_delete = 0
+          AND aat.`code` IN ( 'PDUAC', 'PDUDC', 'PDUBUS' )
+          AND l.`sp_type` = 1
+          AND d.`dc_id` = #{dcId}
+        ORDER BY
+            l.`name`, d.`name`
+    </select>
+
+
+    <select id="findMicroserviceCabinetAttrDevice" resultType="com.gds.jpi.dcim.vo.CabinetAttrDeviceVo">
+        SELECT
+            REPLACE(IFNULL(d.`name`, ''), ' ', '') as deviceName,
+            d.device_id,
+            -- 房间名称和id是微模块父节点的信息
+            p.name roomName,
+            r.id roomId,
+            m.dc_name_inner_full as dcName
+        FROM
+            cbms.`sys_device` d
+                LEFT JOIN geo.`location` l ON d.location_id = l.id
+                LEFT JOIN geo.`dc_mapping` m ON d.dc_id = m.id
+                LEFT JOIN geo.room r ON l.parent_id = r.location_id
+                LEFT JOIN asset.asset_type aat ON aat.id = d.asset_type_id
+                LEFT JOIN geo.`location` p ON p.id = l.parent_id
+        WHERE
+            d.`status` = 1
+          AND aat.`code` IN ( 'PDUAC', 'PDUDC', 'PDUBUS' )
+          -- sp_type` = 13表示微模块
+          AND l.`sp_type` = 13
+          AND d.`dc_id` = #{dcId}
+        ORDER BY
+            l.`name`, d.`name`
+    </select>
+
+    <update id="update4Attr">
+        UPDATE cbms.`sys_cabinet_attr` ca
+            JOIN cbms.`sys_device_attr` da ON ca.device_id = da.device_id AND ca.branch = da.seq
+                JOIN dcim.std_temp_attr sta on sta.temp_attr_id = da.temp_attr_id
+        SET
+        <if test="tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KWH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUAC_CDDE)
+        || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KWH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUDC_CODE)
+        || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KWH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUBUS_CODE)">
+            ca.`kwh_attr_id` = da.`sys_attr_id`
+        </if>
+        <if test="tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_A.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUAC_CDDE)
+        || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_A.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUDC_CODE)
+        || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_A.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUBUS_CODE)">
+            ca.`amp_attr_id` = da.`sys_attr_id`
+        </if>
+        <if test="tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KW.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUAC_CDDE)
+        || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KW.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUDC_CODE)
+        || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KW.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUBUS_CODE)">
+            ca.`kw_attr_id` = da.`sys_attr_id`
+        </if>
+        <if test="tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_SWITCH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUAC_CDDE)
+        || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_SWITCH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUDC_CODE)
+        || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_SWITCH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUBUS_CODE)">
+            ca.`swith_attr_id` = da.`sys_attr_id`
+        </if>
+        WHERE da.`sys_attr_id` IS NOT NULL AND sta.code = #{tempAttrCode} AND ca.rel_id IN
+        <foreach collection="relIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+    <update id="updateAttrElecStatus">
+        UPDATE cbms.sys_cabinet_attr SET status= #{status} ,elec_update_time = now() WHERE rel_id IN
+        <foreach collection="relIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+    <select id="selectCabinetAttrByCabinetId" resultType="com.gds.jpi.dcim.vo.CabinetAttrVo">
+        SELECT
+            ct.`rel_id`,
+            ct.`cabinet_id`,
+            ct.`elec_sn`,
+            ct.`elec_type`,
+            ct.`branch`,
+            ct.`safe_elec_amp`,
+            ct.`status`,
+            ct.`device_id`,
+            ct.`kwh_attr_id`,
+            ct.`kw_attr_id`,
+            ct.`amp_attr_id`,
+            ct.`swith_attr_id`,
+            c.`name` cabinet_name,
+            d.`name` device_name,
+            d.`short_name` device_short_name,
+            d.`location_id`,
+            room_lo.`name` AS room_name,
+            d.`dc_id`,
+            dc.`dc_name_inner_full` dc_name
+        FROM
+            cbms.`sys_cabinet_attr` ct
+                LEFT JOIN cbms.sys_cabinet c ON ct.`cabinet_id` = c.`cabinet_id`
+                LEFT JOIN cbms.`sys_device` d ON ct.`device_id` = d.`device_id`
+                LEFT JOIN geo.dc_mapping dc ON d.dc_id = dc.id
+                LEFT JOIN geo.location room_lo ON d.location_id = room_lo.id
+        WHERE ct.cabinet_id = #{cabinetId}
+    </select>
+    <select id="selectCabinetAttrByCabinetIds" resultType="com.gds.jpi.dcim.vo.CabinetAttrVo">
+        SELECT
+            ct.`rel_id`,
+            ct.`cabinet_id`,
+            ct.`elec_sn`,
+            ct.`elec_type`,
+            ct.`branch`,
+            ct.`safe_elec_amp`,
+            ct.`status`,
+            ct.`device_id`,
+            ct.`kwh_attr_id`,
+            ct.`kw_attr_id`,
+            ct.`amp_attr_id`,
+            ct.`swith_attr_id`,
+            c.`name` cabinet_name,
+            d.`name` device_name,
+            d.`short_name` device_short_name,
+            d.`location_id`,
+            room_lo.`name` AS room_name,
+            d.`dc_id`,
+            dc.`dc_name_inner_full` dc_name
+        FROM
+            cbms.`sys_cabinet_attr` ct
+                LEFT JOIN cbms.sys_cabinet c ON ct.`cabinet_id` = c.`cabinet_id`
+                LEFT JOIN cbms.`sys_device` d ON ct.`device_id` = d.`device_id`
+                LEFT JOIN geo.dc_mapping dc ON d.dc_id = dc.id
+                LEFT JOIN geo.location room_lo ON d.location_id = room_lo.id
+        WHERE ct.cabinet_id in
+        <foreach collection="list" item="cabinetId" open="(" close=")" separator=",">
+            #{cabinetId}
+        </foreach>
+    </select>
+    <select id="findByCabinet" resultType="com.gds.jpi.dcim.model.SysCabinetAttr">
+        SELECT * FROM cbms.sys_cabinet_attr WHERE cabinet_id = #{cabinetId}
+    </select>
+    <select id="findByCabinetIds" resultType="com.gds.jpi.dcim.model.SysCabinetAttr">
+        SELECT * FROM cbms.sys_cabinet_attr WHERE cabinet_id in
+        <foreach collection="list" item="cabinetId" open="(" close=")" separator=",">
+            #{cabinetId}
+        </foreach>
+    </select>
+    <select id="findByDc" resultType="com.gds.jpi.dcim.model.SysCabinetAttr">
+        SELECT a.* FROM
+            cbms.sys_cabinet_attr a left join cbms.sys_cabinet c on a.cabinet_id = c.cabinet_id
+        WHERE c.status = 1 AND c.dc_id = #{dcId}
+    </select>
+    <select id="fetchAttrDecimal" resultType="com.gds.jpi.dcim.dto.SysDeviceAttrDTO">
+        SELECT
+            da.sys_attr_id,
+            ta.decimal_digit
+        FROM
+            cbms.sys_device_attr da
+        JOIN
+            dcim.std_temp_attr ta ON ta.temp_attr_id = da.temp_attr_id
+        WHERE
+            da.sys_attr_id IN
+            <foreach collection="attrIds" item="attrId" open="(" separator="," close=")">
+                #{attrId}
+            </foreach>
+    </select>
+    <select id="getCabinetVoltageAttr" resultType="com.gds.jpi.dcim.model.SysDeviceAttr">
+        SELECT
+            c.cabinet_id, d.*
+        FROM
+            cbms.sys_cabinet c
+                JOIN
+            cbms.sys_cabinet_attr ca on c.cabinet_id = ca.cabinet_id
+                JOIN
+            cbms.sys_device_attr d ON ca.device_id = d.device_id and ca.branch = d.seq
+                JOIN
+            dcim.std_temp_attr a ON d.temp_attr_id = a.temp_attr_id
+        WHERE
+            c.dc_id = #{dc_id} and a.code IN ( 'ATTR_PDUAC_BRANC_CIRCUIT_VOLTAGE', 'ATTR_PDUBUS_BRANCH_CIRCUIT_VOLTAGE', 'ATTR_PDUDC_BRANCH_VOLTAGE')
+    </select>
+    <select id="getCabinetThreeVoltageAttr" resultType="com.gds.jpi.dcim.model.SysDeviceAttr">
+        SELECT
+            c.cabinet_id, d.*
+        FROM
+            cbms.sys_cabinet c
+                JOIN
+            cbms.sys_cabinet_attr ca on c.cabinet_id = ca.cabinet_id
+                JOIN
+            cbms.sys_device_attr d ON ca.device_id = d.device_id and ca.branch = d.seq
+                JOIN
+            dcim.std_temp_attr a ON d.temp_attr_id = a.temp_attr_id
+        WHERE
+            c.dc_id = #{dc_id} and a.code IN ( 'ATTR_PDUAC_BRANCH_CIRCUIT_VOLTAGE_A', 'ATTR_PDUAC_BRANCH_CIRCUIT_VOLTAGE_B','ATTR_PDUAC_BRANCH_CIRCUIT_VOLTAGE_C',
+                                              'ATTR_PDUBUS_BRANCH_CIRCUIT_VOLTAGE_A','ATTR_PDUBUS_BRANCH_CIRCUIT_VOLTAGE_B','ATTR_PDUBUS_BRANCH_CIRCUIT_VOLTAGE_C')
+    </select>
+    <select id="findCabinetAttrByDevice" resultType="com.gds.jpi.dcim.vo.CabinetAttrVo">
+        SELECT
+            ct.`rel_id`,
+            ct.`cabinet_id`,
+            ct.`elec_sn`,
+            ct.`elec_type`,
+            ct.`branch`,
+            ct.`safe_elec_amp`,
+            ct.`status`,
+            ct.`device_id`,
+            ct.`kwh_attr_id`,
+            ct.`kw_attr_id`,
+            ct.`amp_attr_id`,
+            ct.`swith_attr_id`,
+            c.`name` cabinet_name,
+            d.`name` device_name,
+            d.`location_id`,
+            room_lo.`name` AS room_name,
+            d.`dc_id`,
+            dc.`dc_name_inner_full` dc_name
+        FROM
+            cbms.`sys_cabinet_attr` ct
+        LEFT JOIN
+            cbms.`sys_device` d ON ct.`device_id` = d.`device_id`
+        LEFT JOIN
+            cbms.sys_cabinet c ON ct.`cabinet_id` = c.`cabinet_id`
+        LEFT JOIN
+            geo.dc_mapping dc ON d.dc_id = dc.id
+        LEFT JOIN
+            geo.location room_lo ON d.location_id = room_lo.id
+        WHERE
+            d.device_id = #{deviceId}
+    </select>
+    <select id="findCabinetDeviceRel" resultType="com.gds.jpi.dcim.response.CabinetDeviceRelResponse">
+        SELECT
+            DISTINCT
+            ct.`cabinet_id`,
+            ct.`device_id`,
+            c.`name` cabinet_name,
+            d.`name` device_name
+        FROM
+            cbms.`sys_cabinet_attr` ct
+        LEFT JOIN
+            cbms.`sys_device` d ON ct.`device_id` = d.`device_id`
+        LEFT JOIN
+            cbms.sys_cabinet c ON ct.`cabinet_id` = c.`cabinet_id`
+        <where>
+            <if test="cabinetId != null">
+                AND ct.cabinet_id = #{cabinetId}
+            </if>
+            <if test="deviceId != null">
+                AND ct.device_id = #{deviceId}
+            </if>
+        </where>
+    </select>
+
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.SysCabinetAttrMapper">\n    <resultMap type="com.gds.jpi.dcim.model.SysCabinetAttr" id="SysCabinetAttrMap">\n        <result property="relId" column="rel_id" jdbcType="INTEGER"/>\n        <result property="cabinetId" column="cabinet_id" jdbcType="INTEGER"/>\n        <result property="deviceId" column="device_id" jdbcType="INTEGER"/>\n        <result property="elecType" column="elec_type" jdbcType="INTEGER"/>\n        <result property="elecSn" column="elec_sn" jdbcType="INTEGER"/>\n        <result property="branch" column="branch" jdbcType="INTEGER"/>\n        <result property="kwhAttrId" column="kwh_attr_id" jdbcType="INTEGER"/>\n        <result property="kwAttrId" column="kw_attr_id" jdbcType="INTEGER"/>\n        <result property="ampAttrId" column="amp_attr_id" jdbcType="INTEGER"/>\n        <result property="swithAttrId" column="swith_attr_id" jdbcType="INTEGER"/>\n        <result property="status" column="status" jdbcType="INTEGER"/>\n        <result property="safeElecAmp" column="safe_elec_amp" jdbcType="NUMERIC"/>\n        <result property="elecUpdateTime" column="elec_update_time" jdbcType="TIMESTAMP"/>\n    </resultMap>\n\n    <sql id="allColumn">rel_id, cabinet_id, device_id, elec_type, elec_sn, branch, kwh_attr_id, kw_attr_id, amp_attr_id, swith_attr_id, status, safe_elec_amp, elec_update_time</sql>\n    <sql id="noIdColumn">cabinet_id, device_id, elec_type, elec_sn, branch, kwh_attr_id, kw_attr_id, amp_attr_id, swith_attr_id, status, safe_elec_amp, elec_update_time</sql>\n\n    <!--Query using an entity as the filter criteria-->\n    <select id="findSysCabinetAttrList" resultType="com.gds.jpi.dcim.vo.CabinetAttrVo">\n        SELECT\n        ct.rel_id,\n        ct.cabinet_id,\n        ct.elec_sn,\n        ct.elec_type,\n        ct.branch,\n        ct.safe_elec_amp,\n        ct.status,\n        ct.device_id,\n        ct.kwh_attr_id,\n        ct.kw_attr_id,\n        ct.amp_attr_id,\n        ct.swith_attr_id,\n\n        c.name cabinet_name,\n        d.name device_name,\n        d.location_id,\n        room_lo.name AS room_name,\n        d.dc_id,\n        dc.dc_name_inner_full dc_name\n        FROM\n        cbms.sys_cabinet_attr ct\n        LEFT JOIN cbms.sys_cabinet c ON ct.cabinet_id = c.cabinet_id\n        LEFT JOIN cbms.sys_device d ON ct.device_id = d.device_id\n        LEFT JOIN geo.dc_mapping dc ON d.dc_id = dc.id\n        LEFT JOIN geo.location room_lo ON d.location_id = room_lo.id\n        <where>\n            <if test="dcId != null">\n                AND c.dc_id = #{dcId}\n            </if>\n            <if test="cabinetId != null">\n                AND ct.cabinet_id = #{cabinetId}\n            </if>\n            <if test="cabinetIds != null and cabinetIds.size() > 0">\n                AND ct.cabinet_id IN\n                <foreach collection="cabinetIds" open="(" close=")" separator=",">\n                    #{item}\n                </foreach>\n            </if>\n            <if test="relId != null">\n                AND ct.rel_id = #{relId}\n            </if>\n            <if test="relIds != null and relIds.size() > 0">\n                AND ct.rel_id IN\n                <foreach collection="relIds" open="(" close=")" separator=",">\n                    #{item}\n                </foreach>\n            </if>\n        </where>\n    </select>\n\n    <!--Delete by primary key-->\n    <delete id="batchRemove">\n        DELETE\n        FROM cbms.sys_cabinet_attr\n        WHERE rel_id IN\n        <foreach collection="ids" item="item" open="(" close=")" separator=",">\n            #{item}\n        </foreach>\n    </delete>\n\n    <select id="checkExist" resultType="boolean">\n        SELECT COUNT(0) > 0\n        FROM cbms.sys_cabinet_attr\n        WHERE\n        ((device_id = #{deviceId} AND branch = #{branch}) \n        OR\n        (cabinet_id = #{cabinetId} AND elec_sn = #{elecSn} AND elec_type = #{elecType}))\n        <if test="relId != null">\n            AND rel_id != #{relId}\n        </if>\n    </select>\n\n    <select id="checkWoc" resultType="boolean">\n        SELECT COUNT(0) > 0\n        FROM woc.woc_order_detail_opt op\n        LEFT JOIN woc.woc_order wo ON op.orderId = wo.id\n        WHERE wo.status IN (0, 1)\n        <if test="cabinetId != null">\n            AND op.cabinet_id = #{cabinetId}\n        </if>\n        <if test="cabinetIds != null and cabinetIds.size() > 0">\n            AND op.cabinet_id IN\n            <foreach collection="cabinetIds" open="(" close=")" separator=",">\n                #{item}\n            </foreach>\n        </if>\n        <if test="relIds != null and relIds.size() > 0">\n            AND op.cabinet_id IN\n            (\n                SELECT cabinet_id FROM cbms.sys_cabinet_attr WHERE rel_id IN\n                <foreach collection="relIds" open="(" close=")" separator=",">\n                    #{item}\n                </foreach>\n            )\n        </if>\n\n    </select>\n\n    <select id="findDeviceAttr" resultType="com.gds.jpi.dcim.vo.DeviceAttrVo">\n        SELECT sys_attr_id, device_id, tag_id FROM cbms.sys_device_attr\n        <where>\n            <if test="sysAttrIds != null and sysAttrIds.size() > 0" >\n                AND tag_id IS NOT NULL AND sys_attr_id IN\n                <foreach collection="sysAttrIds" item="item" open="(" close=")" separator=",">\n                    #{item}\n                </foreach>\n            </if>\n        </where>\n    </select>\n\n    <select id="findDeviceAttrByDc" resultType="com.gds.jpi.dcim.vo.DeviceAttrVo">\n        SELECT\n            t.device_id,\n            t.seq,\n            SUM(\n                CASE\n                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_CURRENT', 'ATTR_PDUDC_BRANCH_CURRENT', 'ATTR_PDUBUS_BRANCH_CURRENT') THEN 1\n                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_POWER', 'ATTR_PDUDC_BRANCH_POWER', 'ATTR_PDUBUS_BRANCH_POWER') THEN 2\n                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUDC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUBUS_BRANCH_POWER_CONSUMPTION') THEN 4\n                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_SWITCH_STATE', 'ATTR_PDUDC_BRANCH_SWITCH_STATE', 'ATTR_PDUBUS_BRANCH_SWITCH_STATE') THEN 8\n                    ELSE 0\n                END\n            ) AS num,\n            SUM(\n                CASE\n                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_CURRENT', 'ATTR_PDUDC_BRANCH_CURRENT', 'ATTR_PDUBUS_BRANCH_CURRENT') AND t.re >= 1 THEN 1\n                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_POWER', 'ATTR_PDUDC_BRANCH_POWER', 'ATTR_PDUBUS_BRANCH_POWER')  AND t.re >= 1 THEN 2\n                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUDC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUBUS_BRANCH_POWER_CONSUMPTION') AND t.re >= 1 THEN 4\n                    WHEN t.temp_attr_code IN ('ATTR_PDUAC_BRANCH_SWITCH_STATE', 'ATTR_PDUDC_BRANCH_SWITCH_STATE', 'ATTR_PDUBUS_BRANCH_SWITCH_STATE')  AND t.re >= 1 THEN 8\n                    ELSE 0\n                END\n            ) AS repeat\n        FROM\n            (\n                SELECT -- comminicate\n                    da.device_id,\n                    da.seq,\n                    da.temp_attr_id,\n                    sta.code as temp_attr_code,\n                    if(COUNT(0) > 1, 1, 0) AS re\n                FROM\n                    cbms.sys_device_attr da\n                JOIN cbms.sys_device d ON da.device_id = d.device_id\n                JOIN dcim.std_temp_attr sta on sta.temp_attr_id = da.temp_attr_id\n                JOIN asset.asset_type aat on aat.id = d.asset_type_id\n                WHERE\n                  da.seq IS NOT NULL\n                  AND sta.code IN ( 'ATTR_PDUAC_BRANCH_CURRENT', 'ATTR_PDUAC_BRANCH_POWER', 'ATTR_PDUAC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUAC_BRANCH_SWITCH_STATE' )\n                  AND aat.code = 'PDUAC'\n                  <if test="paramMap.dcId != null">\n                      AND d.dc_id = #{paramMap.dcId}\n                  </if>\n                  <if test="paramMap.deviceId != null">\n                    AND da.device_id = #{paramMap.deviceId}\n                  </if>\n                <if test="paramMap.branch != null">\n                    AND da.seq = #{paramMap.branch}\n                </if>\n                GROUP BY\n                    da.device_id, da.seq, sta.code\n                UNION ALL\n                SELECT -- DC\n                    da.device_id,\n                    da.seq,\n                    da.temp_attr_id,\n                    sta.code as temp_attr_code,\n                    if(COUNT(0) > 1, 1, 0) AS re\n                FROM\n                    cbms.sys_device_attr da\n                JOIN cbms.sys_device d ON da.device_id = d.device_id\n                JOIN dcim.std_temp_attr sta on sta.temp_attr_id = da.temp_attr_id\n                JOIN asset.asset_type aat on aat.id = d.asset_type_id\n                WHERE\n                  da.seq IS NOT NULL\n                  AND sta.code IN ( 'ATTR_PDUDC_BRANCH_CURRENT', 'ATTR_PDUDC_BRANCH_POWER', 'ATTR_PDUDC_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUDC_BRANCH_SWITCH_STATE' )\n                  AND aat.code = 'PDUDC'\n                  <if test="paramMap.dcId != null">\n                      AND d.dc_id = #{paramMap.dcId}\n                  </if>\n                  <if test="paramMap.deviceId != null">\n                    AND da.device_id = #{paramMap.deviceId}\n                  </if>\n                <if test="paramMap.branch != null">\n                    AND da.seq = #{paramMap.branch}\n                </if>\n                GROUP BY\n                    da.device_id, da.seq, sta.code\n                UNION ALL\n                SELECT -- Small busbar\n                    da.device_id,\n                    da.seq,\n                    da.temp_attr_id,\n                    sta.code as temp_attr_code,\n                    if(COUNT(0) > 1, 1, 0) AS re\n                FROM\n                    cbms.sys_device_attr da\n                JOIN cbms.sys_device d ON da.device_id = d.device_id\n                JOIN dcim.std_temp_attr sta on sta.temp_attr_id = da.temp_attr_id\n                JOIN asset.asset_type aat on aat.id = d.asset_type_id\n                WHERE\n                    da.seq IS NOT NULL\n                    AND sta.code IN ( 'ATTR_PDUBUS_BRANCH_CURRENT', 'ATTR_PDUBUS_BRANCH_POWER', 'ATTR_PDUBUS_BRANCH_POWER_CONSUMPTION', 'ATTR_PDUBUS_BRANCH_SWITCH_STATE' )\n                    AND aat.code = 'PDUBUS'\n                    <if test="paramMap.dcId != null">\n                        AND d.dc_id = #{paramMap.dcId}\n                    </if>\n                    <if test="paramMap.deviceId != null">\n                        AND da.device_id = #{paramMap.deviceId}\n                    </if>\n                    <if test="paramMap.branch != null">\n                        AND da.seq = #{paramMap.branch}\n                    </if>\n                GROUP BY\n                da.device_id, da.seq, sta.code\n        ) AS t\n        GROUP BY t.device_id, t.seq\n    </select>\n\n    <select id="findDeviceBranchNum" resultType="com.gds.jpi.dcim.vo.DeviceAttrVo">\n        SELECT\n            d.device_id,\n            ROUND( data.value, 0 ) AS num\n        FROM\n            cbms.sys_device d\n            JOIN cbms.sys_device_prop data ON data.device_id = d.device_id\n            JOIN dcim.std_temp_prop temp ON temp.temp_prop_id = data.temp_prop_id\n        WHERE\n            d.STATUS = 1\n          AND d.is_monitoring = 1\n          AND temp.is_del = 0\n          AND value IS NOT NULL\n          AND temp.code IN ('PROP_PDUAC_BRANCH_COUNT', 'PROP_PDUDC_BRANCH_COUNT')\n          AND d.dc_id = #{dcId}\n        ORDER BY  d.device_id\n    </select>\n\n    <select id="findCabinetAttrDevice" resultType="com.gds.jpi.dcim.vo.CabinetAttrDeviceVo">\n        SELECT\n            REPLACE(IFNULL(d.name, ''), ' ', '') as deviceName,\n            d.device_id,\n            l.name as roomName,\n            r.id as roomId,\n            m.dc_name_inner_full as dcName\n        FROM\n            cbms.sys_device d\n            LEFT JOIN geo.location l ON d.location_id = l.id\n            LEFT JOIN geo.dc_mapping m ON d.dc_id = m.id\n            LEFT JOIN geo.room r ON d.location_id = r.location_id\n            LEFT JOIN asset.asset_type aat ON aat.id = d.asset_type_id\n        WHERE\n         d.status = 1 AND r.is_delete = 0\n          AND aat.code IN ( 'PDUAC', 'PDUDC', 'PDUBUS' )\n          AND l.sp_type = 1\n          AND d.dc_id = #{dcId}\n        ORDER BY\n            l.name, d.name\n    </select>\n\n    <select id="findMicroserviceCabinetAttrDevice" resultType="com.gds.jpi.dcim.vo.CabinetAttrDeviceVo">\n        SELECT\n            REPLACE(IFNULL(d.name, ''), ' ', '') as deviceName,\n            d.device_id,\n            -- The room name and id are the information of the parent node of the micro module \n            p.name roomName,\n            r.id roomId,\n            m.dc_name_inner_full as dcName\n        FROM\n            cbms.sys_device d\n                LEFT JOIN geo.location l ON d.location_id = l.id\n                LEFT JOIN geo.dc_mapping m ON d.dc_id = m.id\n                LEFT JOIN geo.room r ON l.parent_id = r.location_id\n                LEFT JOIN asset.asset_type aat ON aat.id = d.asset_type_id\n                LEFT JOIN geo.location p ON p.id = l.parent_id\n        WHERE\n            d.status = 1\n          AND aat.code IN ( 'PDUAC', 'PDUDC', 'PDUBUS' )\n          -- sp_type` = 13 indicates micro module\n          AND l.sp_type = 13\n          AND d.dc_id = #{dcId}\n        ORDER BY\n            l.name, d.name\n    </select>\n\n    <update id=\"update4Attr\">\n        UPDATE cbms.sys_cabinet_attr ca\n            JOIN cbms.sys_device_attr da ON ca.device_id = da.device_id AND ca.branch = da.seq\n                JOIN dcim.std_temp_attr sta on sta.temp_attr_id = da.temp_attr_id\n        SET\n        <if test=\"tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KWH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUAC_CDDE)\n || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KWH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUDC_CODE)\n || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KWH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUBUS_CODE)\">\n            ca.kwh_attr_id = da.sys_attr_id\n        </if>\n        <if test=\"tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_A.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUAC_CDDE)\n || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_A.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUDC_CODE)\n || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_A.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUBUS_CODE)\">\n            ca.amp_attr_id = da.sys_attr_id\n        </if>\n        <if test=\"tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KW.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUAC_CDDE)\n || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KW.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUDC_CODE)\n || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_KW.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUBUS_CODE)\">\n            ca.kw_attr_id = da.sys_attr_id\n        </if>\n        <if test=\"tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_SWITCH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUAC_CDDE)\n || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_SWITCH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUDC_CODE)\n || tempAttrCode == @com.gds.jpi.dcim.core.constant.CabinetAttrConstant@TEMP_ATTR_ID_SWITCH.get(@com.gds.jpi.dcim.core.constant.CabinetAttrConstant@ASSET_TYPE_PDUBUS_CODE)\">\n            ca.swith_attr_id = da.sys_attr_id\n        </if>\n        WHERE da.sys_attr_id IS NOT NULL AND sta.code = #{tempAttrCode} AND ca.rel_id IN\n        <foreach collection=\"relIds\" item=\"item\" open=\"(\" close=\")\" separator=\",\">\n            #{item}\n        </foreach>\n    </update>\n\n    <update id=\"updateAttrElecStatus\">\n        UPDATE cbms.sys_cabinet_attr SET status= #{status} ,elec_update_time = now() WHERE rel_id IN\n        <foreach collection=\"relIds\" item=\"item\" open=\"(\" close=\")\" separator=\",\">\n            #{item}\n        </foreach>\n    </update>\n\n    <select id=\"selectCabinetAttrByCabinetId\" resultType=\"com.gds.jpi.dcim.vo.CabinetAttrVo\">\n        SELECT\n            ct.rel_id,\n            ct.cabinet_id,\n            ct.elec_sn,\n            ct.elec_type,\n            ct.branch,\n            ct.safe_elec_amp,\n            ct.status,\n            ct.device_id,\n            ct.kwh_attr_id,\n            ct.kw_attr_id,\n            ct.amp_attr_id,\n            ct.swith_attr_id,\n            c.name cabinet_name,\n            d.name device_name,\n            d.short_name device_short_name,\n            d.location_id,\n            room_lo.name AS room_name,\n            d.dc_id,\n            dc.dc_name_inner_full dc_name\n        FROM\n            cbms.sys_cabinet_attr ct\n                LEFT JOIN cbms.sys_cabinet c ON ct.cabinet_id = c.cabinet_id\n                LEFT JOIN cbms.sys_device d ON ct.device_id = d.device_id\n                LEFT JOIN geo.dc_mapping dc ON d.dc_id = dc.id\n                LEFT JOIN geo.location room_lo ON d.location_id = room_lo.id\n        WHERE ct.cabinet_id = #{cabinetId}\n    </select>\n\n    <select id=\"selectCabinetAttrByCabinetIds\" resultType=\"com.gds.jpi.dcim.vo.CabinetAttrVo\">\n        SELECT\n            ct.rel_id,\n            ct.cabinet_id,\n            ct.elec_sn,\n            ct.elec_type,\n            ct.branch,\n            ct.safe_elec_amp,\n            ct.status,\n            ct.device_id,\n            ct.kwh_attr_id,\n            ct.kw_attr_id,\n            ct.amp_attr_id,\n            ct.swith_attr_id,\n            c.name cabinet_name,\n            d.name device_name,\n            d.short_name device_short_name,\n            d.location_id,\n            room_lo.name AS room_name,\n            d.dc_id,\n            dc.dc_name_inner_full dc_name\n        FROM\n            cbms.sys_cabinet_attr ct\n                LEFT JOIN cbms.sys_cabinet c ON ct.cabinet_id = c.cabinet_id\n                LEFT JOIN cbms.sys_device d ON ct.device_id = d.device_id\n                LEFT JOIN geo.dc_mapping dc ON d.dc_id = dc.id\n                LEFT JOIN geo.location room_lo ON d.location_id = room_lo.id\n        WHERE ct.cabinet_id in\n        <foreach collection=\"list\" item=\"cabinetId\" open=\"(\" close=\")\" separator=\",\">\n            #{cabinetId}\n        </foreach>\n    </select>\n\n    <select id=\"findByCabinet\" resultType=\"com.gds.jpi.dcim.model.SysCabinetAttr\">\n        SELECT * FROM cbms.sys_cabinet_attr WHERE cabinet_id = #{cabinetId}\n    </select>\n\n    <select id=\"findByCabinetIds\" resultType=\"com.gds.jpi.dcim.model.SysCabinetAttr\">\n        SELECT * FROM cbms.sys_cabinet_attr WHERE cabinet_id in\n        <foreach collection=\"list\" item=\"cabinetId\" open=\"(\" close=\")\" separator=\",\">\n            #{cabinetId}\n        </foreach>\n    </select>\n\n    <select id=\"findByDc\" resultType=\"com.gds.jpi.dcim.model.SysCabinetAttr\">\n        SELECT a.* FROM\n            cbms.sys_cabinet_attr a left join cbms.sys_cabinet c on a.cabinet_id = c.cabinet_id\n        WHERE c.status = 1 AND c.dc_id = #{dcId}\n    </select>\n\n    <select id=\"fetchAttrDecimal\" resultType=\"com.gds.jpi.dcim.dto.SysDeviceAttrDTO\">\n        SELECT\n            da.sys_attr_id,\n            ta.decimal_digit\n        FROM\n            cbms.sys_device_attr da\n        JOIN\n            dcim.std_temp_attr ta ON ta.temp_attr_id = da.temp_attr_id\n        WHERE\n            da.sys_attr_id IN\n            <foreach collection=\"attrIds\" item=\"attrId\" open=\"(\" separator=\",\" close=\")\">\n                #{attrId}\n            </foreach>\n    </select>\n\n    <select id=\"getCabinetVoltageAttr\" resultType=\"com.gds.jpi.dcim.model.SysDeviceAttr\">\n        SELECT\n            c.cabinet_id, d.*\n        FROM\n            cbms.sys_cabinet c\n                JOIN\n            cbms.sys_cabinet_attr ca on c.cabinet_id = ca.cabinet_id\n                JOIN\n            cbms.sys_device_attr d ON ca.device_id = d.device_id and ca.branch = d.seq\n                JOIN\n            dcim.std_temp_attr a ON d.temp_attr_id = a.temp_attr_id\n        WHERE\n            c.dc_id = #{dc_id} and a.code IN ( 'ATTR_PDUAC_BRANC_CIRCUIT_VOLTAGE', 'ATTR_PDUBUS_BRANCH_CIRCUIT_VOLTAGE', 'ATTR_PDUDC_BRANCH_VOLTAGE')\n    </select>\n\n    <select id=\"getCabinetThreeVoltageAttr\" resultType=\"com.gds.jpi.dcim.model.SysDeviceAttr\">\n        SELECT\n            c.cabinet_id, d.*\n        FROM\n            cbms.sys_cabinet c\n                JOIN\n            cbms.sys_cabinet_attr ca on c.cabinet_id = ca.cabinet_id\n                JOIN\n            cbms.sys_device_attr d ON ca.device_id = d.device_id and ca.branch = d.seq\n                JOIN\n            dcim.std_temp_attr a ON d.temp_attr_id = a.temp_attr_id\n        WHERE\n            c.dc_id = #{dc_id} and a.code IN ( 'ATTR_PDUAC_BRANCH_CIRCUIT_VOLTAGE_A', 'ATTR_PDUAC_BRANCH_CIRCUIT_VOLTAGE_B','ATTR_PDUAC_BRANCH_CIRCUIT_VOLTAGE_C',\n                                              'ATTR_PDUBUS_BRANCH_CIRCUIT_VOLTAGE_A','ATTR_PDUBUS_BRANCH_CIRCUIT_VOLTAGE_B','ATTR_PDUBUS_BRANCH_CIRCUIT_VOLTAGE_C')\n    </select>\n\n    <select id=\"findCabinetAttrByDevice\" resultType=\"com.gds.jpi.dcim.vo.CabinetAttrVo\">\n        SELECT\n            ct.rel_id,\n            ct.cabinet_id,\n            ct.elec_sn,\n            ct.elec_type,\n            ct.branch,\n            ct.safe_elec_amp,\n            ct.status,\n            ct.device_id,\n            ct.kwh_attr_id,\n            ct.kw_attr_id,\n            ct.amp_attr_id,\n            ct.swith_attr_id,\n            c.name cabinet_name,\n            d.name device_name,\n            d.location_id,\n            room_lo.name AS room_name,\n            d.dc_id,\n            dc.dc_name_inner_full dc_name\n        FROM\n            cbms.sys_cabinet_attr ct\n        LEFT JOIN\n            cbms.sys_device d ON ct.device_id = d.device_id\n        LEFT JOIN\n            cbms.sys_cabinet c ON ct.cabinet_id = c.cabinet_id\n        LEFT JOIN\n            geo.dc_mapping dc ON d.dc_id = dc.id\n        LEFT JOIN\n            geo.location room_lo ON d.location_id = room_lo.id\n        WHERE\n            d.device_id = #{deviceId}\n    </select>\n\n    <select id=\"findCabinetDeviceRel\" resultType=\"com.gds.jpi.dcim.response.CabinetDeviceRelResponse\">\n        SELECT\n            DISTINCT\n            ct.cabinet_id,\n            ct.device_id,\n            c.name cabinet_name,\n            d.name device_name\n        FROM\n            cbms.sys_cabinet_attr ct\n        LEFT JOIN\n            cbms.sys_device d ON ct.device_id = d.device_id\n        LEFT JOIN\n            cbms.sys_cabinet c ON ct.cabinet_id = c.cabinet_id`\n        <where>\n            <if test="cabinetId != null">\n                AND ct.cabinet_id = #{cabinetId}\n            </if>\n            <if test="deviceId != null">\n                AND ct.device_id = #{deviceId}\n            </if>\n        </where>\n    </select>\n\n</mapper>",
+"details": [
+{
+"lineNumber": 24,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "通过实体作为筛选条件查询",
+"translatedText": "Query using an entity as the filter criteria"
+},
+{
+"lineNumber": 77,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "通过主键删除",
+"translatedText": "Delete by primary key"
+},
+{
+"lineNumber": ,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "微模块",
+"translatedText": "Micro module"
+},
+{
+"lineNumber": 161,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "交流",
+"translatedText": "comminicate"
+},
+{
+"lineNumber": 188,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "直流",
+"translatedText": "DC"
+},
+{
+"lineNumber": 215,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "小母线",
+"translatedText": "Small busbar"
+},
+{
+"lineNumber": 290,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "房间名称和id是微模块父节点的信息",
+"translatedText": "The room name and id are the information of the parent node of the micro module"
+},
+{
+"lineNumber": 290,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "sp_type` = 13表示微模块",
+"translatedText": "sp_type` = 13 indicates micro module"
+}
+]
+}
+
+```
+
+### DEMOS14
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.SysDeviceAttrDelayMapper">
+    <insert id="insertBatch">
+        INSERT INTO cbms.sys_device_attr_delay (sys_attr_id, ctime, delay_cnt, delay_detail) VALUES
+        <foreach collection="delays" item="delay" separator=",">
+            (#{delay.sysAttrId}, #{delay.ctime}, #{delay.delayCnt}, #{delay.delayDetail})
+        </foreach>
+    </insert>
+
+    <select id="findDelays" resultType="com.gds.jpi.dcim.vo.DeviceAttrDelaysResVO">
+        SELECT
+            dc.id AS dc_id,
+            dc.dc_name_inner_short AS dc_name,
+            d.asset_type_id,
+            asset_type.name AS asset_type_name,
+            d.device_id,
+            IFNULL(d.name, d.short_name) AS device_name,
+            d.location_id,
+            l.name AS location_name,
+            attr.sys_attr_id AS attr_id,
+            attr.seq AS attr_seq,
+            t.name AS attr_type,
+            attr.temp_attr_id,
+            temp.name AS temp_attr_name,
+            temp.code AS temp_attr_code,
+            attr.tag_id AS bms_tag_id,
+            tag.tag_no AS bms_tag_no,
+            tag.tag_name AS bms_tag_name,
+            tag.agent_id AS bms_agent_id,
+            agent.name AS bms_agent_name,
+            ad.production AS bms_agent_type,
+            delay.ctime,
+            temp.data_duration,
+            delay.delay_cnt AS error_cnt,
+            delay.delay_detail AS error_detail
+        FROM cbms.sys_device_attr_delay delay
+        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = delay.sys_attr_id
+        JOIN cbms.sys_device d ON d.device_id = attr.device_id
+        LEFT JOIN geo.dc_mapping dc ON dc.id = d.dc_id
+        LEFT JOIN geo.location l ON l.id = d.location_id
+        LEFT JOIN asset.asset_type asset_type ON asset_type.id = d.asset_type_id
+        LEFT JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id
+        LEFT JOIN dcim.std_attr_type_param t ON t.id = temp.attr_type_id
+        LEFT JOIN cbms.cfg_bms_tag tag ON tag.id = attr.tag_id
+        LEFT JOIN cbms.cfg_agent agent ON agent.agent_id = tag.agent_id
+        LEFT JOIN cbms.cfg_agent_type_dict ad ON ad.id = agent.agent_type
+        WHERE d.dc_id = #{dcId}
+        AND delay.ctime BETWEEN #{startTime} AND #{endTime}
+        <if test="assetType != null">
+            AND d.asset_type_id = #{assetType}
+        </if>
+        <if test="agentType != null">
+            AND agent.agent_type = #{agentType}
+        </if>
+        <if test="attrType != null">
+            AND temp.attr_type_id = #{attrType}
+        </if>
+        <if test="keyWord != null">
+            AND (
+            d.name LIKE #{keyWord} OR
+            d.short_name LIKE #{keyWord} OR
+            temp.code LIKE #{keyWord} OR
+            temp.name LIKE #{keyWord}
+            )
+        </if>
+        ORDER BY ctime DESC, d.device_id, attr.temp_attr_id, attr.seq
+    </select>
+
+    <select id="findDelayDeviceTypes" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDeviceTypesResVO">
+        SELECT
+            t.id AS type_id,
+            t.name AS type_name,
+            t2.id AS root_id,
+            t2.name AS root_name,
+            COUNT(DISTINCT delay.sys_attr_id) AS error_attr_cnt
+        FROM cbms.sys_device_attr_delay delay
+        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = delay.sys_attr_id
+        JOIN cbms.sys_device d ON d.device_id = attr.device_id
+        JOIN asset.asset_type t ON t.id = d.asset_type_id
+        JOIN asset.asset_type t2 ON t2.left &lt;= t.left AND t2.right &gt;= t.right AND t2.parent_id IN (1, 2, 3)
+        WHERE d.dc_id = #{dcId}
+        AND delay.ctime BETWEEN #{startTime} AND #{endTime}
+        GROUP BY t.id
+        ORDER BY error_attr_cnt DESC
+    </select>
+
+    <select id="findDelayDevices" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDevicesResVO">
+        SELECT
+            d.device_id,
+            IFNULL(d.short_name, d.name) AS device_name,
+            t.id AS type_id,
+            t.name AS type_name,
+            l.id AS location_id,
+            l.name AS location_name,
+            cnt.attr_cnt,
+            COUNT(DISTINCT delay.sys_attr_id) AS error_attr_cnt
+        FROM cbms.sys_device_attr_delay delay
+        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = delay.sys_attr_id
+        JOIN cbms.sys_device d ON d.device_id = attr.device_id
+        JOIN asset.asset_type t ON t.id = d.asset_type_id
+        JOIN geo.location l ON l.id = d.location_id
+        LEFT JOIN (
+            SELECT
+                _d.device_id,
+                COUNT(_attr.sys_attr_id) AS attr_cnt
+            FROM cbms.sys_device _d
+            JOIN cbms.sys_device_attr _attr ON _attr.device_id = _d.device_id AND _attr.temp_attr_id IS NOT NULL
+            WHERE _d.dc_id = #{dcId}
+            GROUP BY _d.device_id
+        ) cnt ON cnt.device_id = d.device_id
+        WHERE d.dc_id = #{dcId}
+        AND delay.ctime BETWEEN #{startTime} AND #{endTime}
+        GROUP BY d.device_id
+        ORDER BY error_attr_cnt DESC
+    </select>
+
+    <select id="findDelayDcAttrs" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDcAttrsResVO">
+        SELECT
+            temp.temp_attr_id,
+            temp.name AS temp_attr_name,
+            COUNT(DISTINCT attr.sys_attr_id) AS error_attr_cnt
+        FROM cbms.sys_device_attr attr
+        JOIN cbms.sys_device_attr_delay delay ON delay.sys_attr_id = attr.sys_attr_id
+        JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id AND temp.is_del = 0
+        WHERE attr.dc_id = #{dcId}
+        AND delay.ctime BETWEEN #{startTime} AND #{endTime}
+        GROUP BY temp.temp_attr_id
+    </select>
+
+    <select id="findDelayAttrCnt" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorAttrCntResVO">
+        SELECT
+            delay.ctime AS time,
+            COUNT(DISTINCT delay.sys_attr_id) AS cnt
+        FROM cbms.sys_device_attr_delay delay
+        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = delay.sys_attr_id
+        JOIN cbms.sys_device d ON d.device_id = attr.device_id
+        WHERE delay.ctime BETWEEN #{startTime} AND #{endTime}
+        <choose>
+            <when test="dcId != null">
+                AND d.dc_id = #{dcId}
+                GROUP BY d.dc_id, delay.ctime
+            </when>
+            <otherwise>
+                AND d.device_id = #{deviceId}
+                GROUP BY d.device_id, delay.ctime
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findDelayCnt" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorCntResVO">
+        SELECT
+            delay.ctime AS `time`,
+            delay.delay_cnt AS cnt
+        FROM cbms.sys_device_attr_delay delay
+        WHERE delay.sys_attr_id = #{attrId}
+        AND delay.ctime BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+    <select id="findDelayDeviceAttrs" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDeviceAttrsResVO">
+        SELECT
+            attr.sys_attr_id AS attr_id,
+            attr.name AS attr_name,
+            attr.seq,
+            temp.temp_attr_id,
+            temp.name AS temp_attr_name,
+            temp.attr_type_id,
+            t.name AS attr_type_name
+        FROM cbms.sys_device d
+        JOIN cbms.sys_device_attr attr ON attr.device_id = d.device_id
+        JOIN cbms.sys_device_attr_delay err ON err.sys_attr_id = attr.sys_attr_id
+        LEFT JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id
+        LEFT JOIN dcim.std_attr_type_param t ON t.id = temp.attr_type_id
+        WHERE d.device_id = #{deviceId}
+          AND err.ctime BETWEEN #{startTime} AND #{endTime}
+    </select>
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.SysDeviceAttrDelayMapper">\n    <insert id="insertBatch">\n        INSERT INTO cbms.sys_device_attr_delay (sys_attr_id, ctime, delay_cnt, delay_detail) VALUES\n        <foreach collection="delays" item="delay" separator=",">\n            (#{delay.sysAttrId}, #{delay.ctime}, #{delay.delayCnt}, #{delay.delayDetail}) \n        </foreach>\n    </insert>\n\n    <select id="findDelays" resultType="com.gds.jpi.dcim.vo.DeviceAttrDelaysResVO">\n        SELECT\n            dc.id AS dc_id,\n            dc.dc_name_inner_short AS dc_name,\n            d.asset_type_id,\n            asset_type.name AS asset_type_name,\n            d.device_id,\n            IFNULL(d.name, d.short_name) AS device_name,\n            d.location_id,\n            l.name AS location_name,\n            attr.sys_attr_id AS attr_id,\n            attr.seq AS attr_seq,\n            t.name AS attr_type,\n            attr.temp_attr_id,\n            temp.name AS temp_attr_name,\n            temp.code AS temp_attr_code,\n            attr.tag_id AS bms_tag_id,\n            tag.tag_no AS bms_tag_no,\n            tag.tag_name AS bms_tag_name,\n            tag.agent_id AS bms_agent_id,\n            agent.name AS bms_agent_name,\n            ad.production AS bms_agent_type,\n            delay.ctime,\n            temp.data_duration,\n            delay.delay_cnt AS error_cnt,\n            delay.delay_detail AS error_detail\n        FROM cbms.sys_device_attr_delay delay\n        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = delay.sys_attr_id\n        JOIN cbms.sys_device d ON d.device_id = attr.device_id\n        LEFT JOIN geo.dc_mapping dc ON dc.id = d.dc_id\n        LEFT JOIN geo.location l ON l.id = d.location_id\n        LEFT JOIN asset.asset_type asset_type ON asset_type.id = d.asset_type_id\n        LEFT JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id\n        LEFT JOIN dcim.std_attr_type_param t ON t.id = temp.attr_type_id\n        LEFT JOIN cbms.cfg_bms_tag tag ON tag.id = attr.tag_id\n        LEFT JOIN cbms.cfg_agent agent ON agent.agent_id = tag.agent_id\n        LEFT JOIN cbms.cfg_agent_type_dict ad ON ad.id = agent.agent_type\n        WHERE d.dc_id = #{dcId}\n        AND delay.ctime BETWEEN #{startTime} AND #{endTime}\n        <if test="assetType != null">\n            AND d.asset_type_id = #{assetType}\n        </if>\n        <if test="agentType != null">\n            AND agent.agent_type = #{agentType}\n        </if>\n        <if test="attrType != null">\n            AND temp.attr_type_id = #{attrType}\n        </if>\n        <if test="keyWord != null">\n            AND (\n            d.name LIKE #{keyWord} OR\n            d.short_name LIKE #{keyWord} OR\n            temp.code LIKE #{keyWord} OR\n            temp.name LIKE #{keyWord}\n            )\n        </if>\n        ORDER BY ctime DESC, d.device_id, attr.temp_attr_id, attr.seq\n    </select>\n\n    <select id="findDelayDeviceTypes" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDeviceTypesResVO">\n        SELECT\n            t.id AS type_id,\n            t.name AS type_name,\n            t2.id AS root_id,\n            t2.name AS root_name,\n            COUNT(DISTINCT delay.sys_attr_id) AS error_attr_cnt\n        FROM cbms.sys_device_attr_delay delay\n        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = delay.sys_attr_id\n        JOIN cbms.sys_device d ON d.device_id = attr.device_id\n        JOIN asset.asset_type t ON t.id = d.asset_type_id\n        JOIN asset.asset_type t2 ON t2.left &lt;= t.left AND t2.right &gt;= t.right AND t2.parent_id IN (1, 2, 3)\n        WHERE d.dc_id = #{dcId}\n        AND delay.ctime BETWEEN #{startTime} AND #{endTime}\n        GROUP BY t.id\n        ORDER BY error_attr_cnt DESC\n    </select>\n\n    <select id="findDelayDevices" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDevicesResVO">\n        SELECT\n            d.device_id,\n            IFNULL(d.short_name, d.name) AS device_name,\n            t.id AS type_id,\n            t.name AS type_name,\n            l.id AS location_id,\n            l.name AS location_name,\n            cnt.attr_cnt,\n            COUNT(DISTINCT delay.sys_attr_id) AS error_attr_cnt\n        FROM cbms.sys_device_attr_delay delay\n        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = delay.sys_attr_id\n        JOIN cbms.sys_device d ON d.device_id = attr.device_id\n        JOIN asset.asset_type t ON t.id = d.asset_type_id\n        JOIN geo.location l ON l.id = d.location_id\n        LEFT JOIN (\n            SELECT\n                _d.device_id,\n                COUNT(_attr.sys_attr_id) AS attr_cnt\n            FROM cbms.sys_device _d\n            JOIN cbms.sys_device_attr _attr ON _attr.device_id = _d.device_id AND _attr.temp_attr_id IS NOT NULL\n            WHERE _d.dc_id = #{dcId}\n            GROUP BY _d.device_id\n        ) cnt ON cnt.device_id = d.device_id\n        WHERE d.dc_id = #{dcId}\n        AND delay.ctime BETWEEN #{startTime} AND #{endTime}\n        GROUP BY d.device_id\n        ORDER BY error_attr_cnt DESC\n    </select>\n\n    <select id="findDelayDcAttrs" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDcAttrsResVO">\n        SELECT\n            temp.temp_attr_id,\n            temp.name AS temp_attr_name,\n            COUNT(DISTINCT attr.sys_attr_id) AS error_attr_cnt\n        FROM cbms.sys_device_attr attr\n        JOIN cbms.sys_device_attr_delay delay ON delay.sys_attr_id = attr.sys_attr_id\n        JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id AND temp.is_del = 0\n        WHERE attr.dc_id = #{dcId}\n        AND delay.ctime BETWEEN #{startTime} AND #{endTime}\n        GROUP BY temp.temp_attr_id\n    </select>\n\n    <select id="findDelayAttrCnt" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorAttrCntResVO">\n        SELECT\n            delay.ctime AS `time`,\n            delay.delay_cnt AS cnt\n        FROM cbms.sys_device_attr_delay delay\n        WHERE delay.sys_attr_id = #{attrId}\n        AND delay.ctime BETWEEN #{startTime} AND #{endTime}\n    </select>\n\n    <select id="findDelayDeviceAttrs" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDeviceAttrsResVO">\n        SELECT\n            attr.sys_attr_id AS attr_id,\n            attr.name AS attr_name,\n            attr.seq,\n            temp.temp_attr_id,\n            temp.name AS temp_attr_name,\n            temp.attr_type_id,\n            t.name AS attr_type_name\n        FROM cbms.sys_device d\n        JOIN cbms.sys_device_attr attr ON attr.device_id = d.device_id\n        JOIN cbms.sys_device_attr_delay err ON err.sys_attr_id = attr.sys_attr_id\n        LEFT JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id\n        LEFT JOIN dcim.std_attr_type_param t ON t.id = temp.attr_type_id\n        WHERE d.device_id = #{deviceId}\n          AND err.ctime BETWEEN #{startTime} AND #{endTime}\n    </select>\n</mapper>",
+"details": [
+{
+"lineNumber": 14,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "延迟属性",
+"translatedText": "Delay attribute"
+},
+{
+"lineNumber": 15,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "延迟次数",
+"translatedText": "Delay count"
+},
+{
+"lineNumber": 16,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "延迟详情",
+"translatedText": "Delay detail"
+},
+{
+"lineNumber": 17,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "数据中心",
+"translatedText": "Data center"
+},
+{
+"lineNumber": 18,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "资产类型",
+"translatedText": "Asset type"
+},
+{
+"lineNumber": 19,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "代理类型",
+"translatedText": "Agent type"
+},
+{
+"lineNumber": 20,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "属性类型",
+"translatedText": "Attribute type"
+},
+{
+"lineNumber": 21,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "属性名称",
+"translatedText": "Attribute name"
+},
+{
+"lineNumber": 22,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "属性编码",
+"translatedText": "Attribute code"
+},
+{
+"lineNumber": 23,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "BMS标签ID",
+"translatedText": "BMS tag ID"
+},
+{
+"lineNumber": 24,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "BMS标签编号",
+"translatedText": "BMS tag number"
+},
+{
+"lineNumber": 25,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "BMS标签名称",
+"translatedText": "BMS tag name"
+},
+{
+"lineNumber": 26,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "BMS代理ID",
+"translatedText": "BMS agent ID"
+},
+{
+"lineNumber": 27,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "BMS代理名称",
+"translatedText": "BMS agent name"
+},
+{
+"lineNumber": 28,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "BMS代理类型",
+"translatedText": "BMS agent type"
+}
+]
+}
+
+```
+
+### DEMOS15
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.SysDeviceCombinationMapper">
+
+    <select id="list" resultType="com.gds.jpi.dcim.dto.SysDeviceCombinationDTO">
+        SELECT
+        sdc.combination_id ,
+        sdc.sequence,
+        aat.id composeDeviceTypeId ,
+        aat.`name` composeDeviceTypeName,
+        IFNULL(a.has_std, 0) composeDeviceHasStd,
+        aat2.id atomDeviceTypeId,
+        aat2.`name` atomDeviceTypeName,
+        IFNULL(b.has_std, 0) atomDeviceHasStd
+        FROM sys_device_combination sdc
+        LEFT JOIN asset.asset_type aat ON sdc.compose_device_type_code = aat.code
+        LEFT JOIN asset.asset_type aat2 ON sdc.atom_device_type_code = aat2.code
+        Left Join dcim.sys_device_type_detail a ON a.asset_type_id = aat.id
+        Left Join dcim.sys_device_type_detail b ON b.asset_type_id = aat2.id
+        <where>
+            <if test="deviceTypeId != null ">
+                aat.id = #{deviceTypeId}
+            </if>
+        </where>
+    </select>
+</mapper>
+```
+
+#### Output:
+
+```json
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.SysDeviceCombinationMapper">
+
+    <select id="list" resultType="com.gds.jpi.dcim.dto.SysDeviceCombinationDTO">
+        SELECT
+        sdc.combination_id ,
+        sdc.sequence,
+        aat.id composeDeviceTypeId ,
+        aat.name composeDeviceTypeName,
+        IFNULL(a.has_std, 0) composeDeviceHasStd,
+        aat2.id atomDeviceTypeId,
+        aat2.name atomDeviceTypeName,
+        IFNULL(b.has_std, 0) atomDeviceHasStd
+        FROM sys_device_combination sdc
+        LEFT JOIN asset.asset_type aat ON sdc.compose_device_type_code = aat.code
+        LEFT JOIN asset.asset_type aat2 ON sdc.atom_device_type_code = aat2.code
+        Left Join dcim.sys_device_type_detail a ON a.asset_type_id = aat.id
+        Left Join dcim.sys_device_type_detail b ON b.asset_type_id = aat2.id
+        <where>
+            <if test="deviceTypeId != null ">
+                aat.id = #{deviceTypeId}
+            </if>
+        </where>
+    </select>
+</mapper>
+
+```
+
+### DEMOS16
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.SysImportRecordMapper">
+
+    <!--查询单个-->
+    <select id="findList" resultType="com.gds.jpi.dcim.vo.ImportRecordVo">
+        SELECT
+        r.`record_id`,
+        r.`dc_id`,
+        r.`module`,
+        r.`create_time`,
+        r.`create_account`,
+        r.`status`,
+        r.`update_time`,
+        a.`name` create_name,
+        if(s.`email` is not null AND s.`email` != '', s.`email`, a.`email`) AS createEmail,
+        dc.dc_name_inner_full AS dc_name
+        FROM cbms.sys_import_record r
+        LEFT JOIN sms.`account` a ON a.`account` = r.`create_account`
+        LEFT JOIN sms.`staff` s ON s.`account` = r.`create_account`
+        LEFT JOIN geo.dc_mapping dc ON r.dc_id = dc.id
+        WHERE r.`status` = 2
+        <if test="account != null and account != ''">
+            AND r.`create_account` = #{account}
+        </if>
+        <if test="dcId != null">
+            AND r.dc_id = #{dcId}
+        </if>
+    </select>
+
+    <select id="selectUserInfo" resultType="com.gds.jpi.dcim.vo.ImportRecordVo">
+        SELECT
+            a.`name` create_name,
+            if(s.`email` is not null AND s.`email` != '', s.`email`, a.`email`) AS createEmail
+        FROM
+        sms.`account` a
+        LEFT JOIN sms.`staff` s ON s.`account` = a.`account`
+        where a.`account` = #{account}
+    </select>
+
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+  "translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace=\"com.gds.jpi.dcim.core.mapper.SysImportRecordMapper\">\n\n    <!--Query single record-->\n    <select id=\"findList\" resultType=\"com.gds.jpi.dcim.vo.ImportRecordVo\">\n        SELECT\n        r.`record_id`,\n        r.`dc_id`,\n        r.`module`,\n        r.`create_time`,\n        r.`create_account`,\n        r.`status`,\n        r.`update_time`,\n        a.`name` create_name,\n        if(s.`email` is not null AND s.`email` != '', s.`email`, a.`email`) AS createEmail,\n        dc.`dc_name_inner_full` AS dc_name\n        FROM cbms.`sys_import_record` r\n        LEFT JOIN sms.`account` a ON a.`account` = r.`create_account`\n        LEFT JOIN sms.`staff` s ON s.`account` = r.`create_account`\n        LEFT JOIN geo.`dc_mapping` dc ON r.`dc_id` = dc.`id`\n        WHERE r.`status` = 2\n        <if test=\"account != null and account != ''\">\n            AND r.`create_account` = #{account}\n        </if>\n        <if test=\"dcId != null\">\n            AND r.`dc_id` = #{dcId}\n        </if>\n    </select>\n\n    <select id=\"selectUserInfo\" resultType=\"com.gds.jpi.dcim.vo.ImportRecordVo\">\n        SELECT\n            a.`name` create_name,\n            if(s.`email` is not null AND s.`email` != '', s.`email`, a.`email`) AS createEmail\n        FROM\n        sms.`account` a\n        LEFT JOIN sms.`staff` s ON s.`account` = a.`account`\n        WHERE a.`account` = #{account}\n    </select>\n\n</mapper>",
+"details": [
+{
+"lineNumber": 14,
+"lineType": "comment",
+"jobType": "Text Translation",
+"originalText": "查询单个",
+"translatedText": "Query single record"
+}
+]
+}
+
+```
+
+### DEMOS17
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.TempAttrExpressionMapper">
+    <select id="findAttrCodesByTypeAttr" resultType="com.gds.jpi.dcim.vo.TempAttrCodeVO">
+        SELECT
+            t.asset_type_id,
+            ta.`code`
+        FROM
+            dcim.std_temp_attr t
+        JOIN
+            dcim.std_temp_attr ta ON ta.asset_type_id = t.asset_type_id AND t.is_del = 0
+        WHERE
+            t.temp_attr_id = #{tempAttrId}
+            AND t.is_del = 0
+    </select>
+    <select id="findExpressionByAssetType" resultType="com.gds.jpi.dcim.model.std.StdTempAttrExpression">
+        SELECT
+            e.expression
+        FROM
+            dcim.std_temp_attr t
+        JOIN
+            dcim.std_temp_attr_expression e ON e.temp_attr_id = t.temp_attr_id AND e.del_flag = 0
+        WHERE
+            t.asset_type_id = #{assetTypeId}
+            AND t.is_del = 0
+    </select>
+    <delete id="deleteDeviceTempAttr">
+        DELETE
+        FROM
+            dcim.std_device_expression_temp_attr
+        WHERE asset_type_id = #{assetTypeId}
+    </delete>
+    <insert id="createDeviceTempAttr">
+        INSERT INTO dcim.std_device_expression_temp_attr (asset_type_id, temp_attr_id)
+        SELECT
+            #{assetTypeId} AS asset_type_id,
+            temp_attr_id
+        FROM
+            dcim.std_temp_attr
+        WHERE
+            code IN
+        <foreach collection="attrCodes" item="attrCode" open="(" separator="," close=")">
+            #{attrCode}
+        </foreach>
+    </insert>
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.TempAttrExpressionMapper">\n    <select id="findAttrCodesByTypeAttr" resultType="com.gds.jpi.dcim.vo.TempAttrCodeVO">\n        SELECT\n            t.asset_type_id,\n            ta.`code`\n        FROM\n            dcim.std_temp_attr t\n        JOIN\n            dcim.std_temp_attr ta ON ta.asset_type_id = t.asset_type_id AND t.is_del = 0\n        WHERE\n            t.temp_attr_id = #{tempAttrId}\n            AND t.is_del = 0\n    </select>\n    <select id="findExpressionByAssetType" resultType="com.gds.jpi.dcim.model.std.StdTempAttrExpression">\n        SELECT\n            e.expression\n        FROM\n            dcim.std_temp_attr t\n        JOIN\n            dcim.std_temp_attr_expression e ON e.temp_attr_id = t.temp_attr_id AND e.del_flag = 0\n        WHERE\n            t.asset_type_id = #{assetTypeId}\n            AND t.is_del = 0\n    </select>\n    <delete id="deleteDeviceTempAttr">\n        DELETE\n        FROM\n            dcim.std_device_expression_temp_attr\n        WHERE asset_type_id = #{assetTypeId}\n    </delete>\n    <insert id="createDeviceTempAttr">\n        INSERT INTO dcim.std_device_expression_temp_attr (asset_type_id, temp_attr_id)\n        SELECT\n            #{assetTypeId} AS asset_type_id,\n            temp_attr_id\n        FROM\n            dcim.std_temp_attr\n        WHERE\n            code IN\n        <foreach collection="attrCodes" item="attrCode" open="(" separator="," close=")">\n            #{attrCode}\n        </foreach>\n    </insert>\n</mapper>",
+"details": []
+}
+
+```
+
+### DEMOS18
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.SysDeviceAttrInvalidMapper">
+    <insert id="insertBatch">
+        INSERT INTO cbms.sys_device_attr_invalid (sys_attr_id, ctime, invalid_cnt, invalid_detail) VALUES
+        <foreach collection="invalids" item="i" separator=",">
+            (#{i.sysAttrId}, #{i.ctime}, #{i.invalidCnt}, #{i.invalidDetail})
+        </foreach>
+    </insert>
+
+    <select id="findInvalids" resultType="com.gds.jpi.dcim.vo.DeviceAttrInvalidsResVO">
+        SELECT
+            dc.id AS dc_id,
+            dc.dc_name_inner_short AS dc_name,
+            d.asset_type_id,
+            asset_type.name AS asset_type_name,
+            d.device_id,
+            IFNULL(d.name, d.short_name) AS device_name,
+            d.location_id,
+            l.name AS location_name,
+            attr.sys_attr_id AS attr_id,
+            attr.seq AS attr_seq,
+            t.name AS attr_type,
+            attr.temp_attr_id,
+            temp.name AS temp_attr_name,
+            temp.code AS temp_attr_code,
+            attr.tag_id AS bms_tag_id,
+            tag.tag_no AS bms_tag_no,
+            tag.tag_name AS bms_tag_name,
+            tag.agent_id AS bms_agent_id,
+            agent.name AS bms_agent_name,
+            ad.production AS bms_agent_type,
+            invalid.ctime,
+            temp.validate_expression,
+            invalid.invalid_cnt AS error_cnt,
+            invalid.invalid_detail AS error_detail
+        FROM cbms.sys_device_attr_invalid invalid
+        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = invalid.sys_attr_id
+        JOIN cbms.sys_device d ON d.device_id = attr.device_id
+        LEFT JOIN geo.dc_mapping dc ON dc.id = d.dc_id
+        LEFT JOIN geo.location l ON l.id = d.location_id
+        LEFT JOIN asset.asset_type asset_type ON asset_type.id = d.asset_type_id
+        LEFT JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id
+        LEFT JOIN dcim.std_attr_type_param t ON t.id = temp.attr_type_id
+        LEFT JOIN cbms.cfg_bms_tag tag ON tag.id = attr.tag_id
+        LEFT JOIN cbms.cfg_agent agent ON agent.agent_id = tag.agent_id
+        LEFT JOIN cbms.cfg_agent_type_dict ad ON ad.id = agent.agent_type
+        WHERE d.dc_id = #{dcId}
+        AND invalid.ctime BETWEEN #{startTime} AND #{endTime}
+        <if test="assetType != null">
+            AND d.asset_type_id = #{assetType}
+        </if>
+        <if test="agentType != null">
+            AND agent.agent_type = #{agentType}
+        </if>
+        <if test="attrType != null">
+            AND temp.attr_type_id = #{attrType}
+        </if>
+        <if test="keyWord != null">
+            AND (
+                d.name LIKE #{keyWord} OR
+                d.short_name LIKE #{keyWord} OR
+                temp.code LIKE #{keyWord} OR
+                temp.name LIKE #{keyWord}
+            )
+        </if>
+        ORDER BY ctime DESC, d.device_id, attr.temp_attr_id, attr.seq
+    </select>
+
+    <select id="findInvalidDeviceTypes" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDeviceTypesResVO">
+        SELECT
+            t.id AS type_id,
+            t.name AS type_name,
+            t2.id AS root_id,
+            t2.name AS root_name,
+            COUNT(DISTINCT invalid.sys_attr_id) AS error_attr_cnt
+        FROM cbms.sys_device_attr_invalid invalid
+        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = invalid.sys_attr_id
+        JOIN cbms.sys_device d ON d.device_id = attr.device_id
+        JOIN asset.asset_type t ON t.id = d.asset_type_id
+        JOIN asset.asset_type t2 ON t2.left &lt;= t.left AND t2.right &gt;= t.right AND t2.parent_id IN (1, 2, 3)
+        WHERE d.dc_id = #{dcId}
+        AND invalid.ctime BETWEEN #{startTime} AND #{endTime}
+        GROUP BY t.id
+        ORDER BY error_attr_cnt DESC
+    </select>
+
+    <select id="findInvalidDevices" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDevicesResVO">
+        SELECT
+            d.device_id,
+            IFNULL(d.short_name, d.name) AS device_name,
+            t.id AS type_id,
+            t.name AS type_name,
+            l.id AS location_id,
+            l.name AS location_name,
+            cnt.attr_cnt,
+            COUNT(DISTINCT invalid.sys_attr_id) AS error_attr_cnt
+        FROM cbms.sys_device_attr_invalid invalid
+        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = invalid.sys_attr_id
+        JOIN cbms.sys_device d ON d.device_id = attr.device_id
+        JOIN asset.asset_type t ON t.id = d.asset_type_id
+        JOIN geo.location l ON l.id = d.location_id
+        LEFT JOIN (
+            SELECT
+                _d.device_id,
+                COUNT(_attr.sys_attr_id) AS attr_cnt
+            FROM cbms.sys_device _d
+            JOIN cbms.sys_device_attr _attr ON _attr.device_id = _d.device_id AND _attr.temp_attr_id IS NOT NULL
+            WHERE _d.dc_id = #{dcId}
+            GROUP BY _d.device_id
+        ) cnt ON cnt.device_id = d.device_id
+        WHERE d.dc_id = #{dcId}
+        AND invalid.ctime BETWEEN #{startTime} AND #{endTime}
+        GROUP BY d.device_id
+        ORDER BY error_attr_cnt DESC
+    </select>
+
+    <select id="findInvalidDcAttrs" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDcAttrsResVO">
+        SELECT
+            temp.temp_attr_id,
+            temp.name AS temp_attr_name,
+            COUNT(DISTINCT attr.sys_attr_id) AS error_attr_cnt
+        FROM cbms.sys_device_attr attr
+        JOIN cbms.sys_device_attr_invalid invalid ON invalid.sys_attr_id = attr.sys_attr_id
+        JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id AND temp.is_del = 0
+        WHERE attr.dc_id = #{dcId}
+          AND invalid.ctime BETWEEN #{startTime} AND #{endTime}
+        GROUP BY temp.temp_attr_id
+    </select>
+
+    <select id="findInvalidAttrCnt" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorAttrCntResVO">
+        SELECT
+            invalid.ctime AS time,
+            COUNT(DISTINCT invalid.sys_attr_id) AS cnt
+        FROM cbms.sys_device_attr_invalid invalid
+        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = invalid.sys_attr_id
+        JOIN cbms.sys_device d ON d.device_id = attr.device_id
+        WHERE invalid.ctime BETWEEN #{startTime} AND #{endTime}
+        <choose>
+            <when test="dcId != null">
+                AND d.dc_id = #{dcId}
+                GROUP BY d.dc_id, invalid.ctime
+            </when>
+            <otherwise>
+                AND d.device_id = #{deviceId}
+                GROUP BY d.device_id, invalid.ctime
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findInvalidCnt" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorCntResVO">
+        SELECT
+            invalid.ctime AS `time`,
+            invalid.invalid_cnt AS cnt
+        FROM cbms.sys_device_attr_invalid invalid
+        WHERE invalid.sys_attr_id = #{attrId}
+          AND invalid.ctime BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+    <select id="findInvalidDeviceAttrs" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDeviceAttrsResVO">
+        SELECT
+            attr.sys_attr_id AS attr_id,
+            attr.name AS attr_name,
+            attr.seq,
+            temp.temp_attr_id,
+            temp.name AS temp_attr_name,
+            temp.attr_type_id,
+            t.name AS attr_type_name
+        FROM cbms.sys_device d
+        JOIN cbms.sys_device_attr attr ON attr.device_id = d.device_id
+        JOIN cbms.sys_device_attr_invalid err ON err.sys_attr_id = attr.sys_attr_id
+        LEFT JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id
+        LEFT JOIN dcim.std_attr_type_param t ON t.id = temp.attr_type_id
+        WHERE d.device_id = #{deviceId}
+          AND err.ctime BETWEEN #{startTime} AND #{endTime}
+    </select>
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.SysDeviceAttrInvalidMapper">\n    <insert id="insertBatch">\n        INSERT INTO cbms.sys_device_attr_invalid (sys_attr_id, ctime, invalid_cnt, invalid_detail) VALUES\n        <foreach collection="invalids" item="i" separator=",">\n            (#{i.sysAttrId}, #{i.ctime}, #{i.invalidCnt}, #{i.invalidDetail})\n        </foreach>\n    </insert>\n\n    <select id="findInvalids" resultType="com.gds.jpi.dcim.vo.DeviceAttrInvalidsResVO">\n        SELECT\n            dc.id AS dc_id,\n            dc.dc_name_inner_short AS dc_name,\n            d.asset_type_id,\n            asset_type.name AS asset_type_name,\n            d.device_id,\n            IFNULL(d.name, d.short_name) AS device_name,\n            d.location_id,\n            l.name AS location_name,\n            attr.sys_attr_id AS attr_id,\n            attr.seq AS attr_seq,\n            t.name AS attr_type,\n            attr.temp_attr_id,\n            temp.name AS temp_attr_name,\n            temp.code AS temp_attr_code,\n            attr.tag_id AS bms_tag_id,\n            tag.tag_no AS bms_tag_no,\n            tag.tag_name AS bms_tag_name,\n            tag.agent_id AS bms_agent_id,\n            agent.name AS bms_agent_name,\n            ad.production AS bms_agent_type,\n            invalid.ctime,\n            temp.validate_expression,\n            invalid.invalid_cnt AS error_cnt,\n            invalid.invalid_detail AS error_detail\n        FROM cbms.sys_device_attr_invalid invalid\n        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = invalid.sys_attr_id\n        JOIN cbms.sys_device d ON d.device_id = attr.device_id\n        LEFT JOIN geo.dc_mapping dc ON dc.id = d.dc_id\n        LEFT JOIN geo.location l ON l.id = d.location_id\n        LEFT JOIN asset.asset_type asset_type ON asset_type.id = d.asset_type_id\n        LEFT JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id\n        LEFT JOIN dcim.std_attr_type_param t ON t.id = temp.attr_type_id\n        LEFT JOIN cbms.cfg_bms_tag tag ON tag.id = attr.tag_id\n        LEFT JOIN cbms.cfg_agent agent ON agent.agent_id = tag.agent_id\n        LEFT JOIN cbms.cfg_agent_type_dict ad ON ad.id = agent.agent_type\n        WHERE d.dc_id = #{dcId}\n        AND invalid.ctime BETWEEN #{startTime} AND #{endTime}\n        <if test="assetType != null">\n            AND d.asset_type_id = #{assetType}\n        </if>\n        <if test="agentType != null">\n            AND agent.agent_type = #{agentType}\n        </if>\n        <if test="attrType != null">\n            AND temp.attr_type_id = #{attrType}\n        </if>\n        <if test="keyWord != null">\n            AND (\n                d.name LIKE #{keyWord} OR\n                d.short_name LIKE #{keyWord} OR\n                temp.code LIKE #{keyWord} OR\n                temp.name LIKE #{keyWord}\n            )\n        </if>\n        ORDER BY ctime DESC, d.device_id, attr.temp_attr_id, attr.seq\n    </select>\n\n    <select id="findInvalidDeviceTypes" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDeviceTypesResVO">\n        SELECT\n            t.id AS type_id,\n            t.name AS type_name,\n            t2.id AS root_id,\n            t2.name AS root_name,\n            COUNT(DISTINCT invalid.sys_attr_id) AS error_attr_cnt\n        FROM cbms.sys_device_attr_invalid invalid\n        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = invalid.sys_attr_id\n        JOIN cbms.sys_device d ON d.device_id = attr.device_id\n        JOIN asset.asset_type t ON t.id = d.asset_type_id\n        JOIN asset.asset_type t2 ON t2.left &lt;= t.left AND t2.right &gt;= t.right AND t2.parent_id IN (1, 2, 3)\n        WHERE d.dc_id = #{dcId}\n        AND invalid.ctime BETWEEN #{startTime} AND #{endTime}\n        GROUP BY t.id\n        ORDER BY error_attr_cnt DESC\n    </select>\n\n    <select id="findInvalidDevices" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDevicesResVO">\n        SELECT\n            d.device_id,\n            IFNULL(d.short_name, d.name) AS device_name,\n            t.id AS type_id,\n            t.name AS type_name,\n            l.id AS location_id,\n            l.name AS location_name,\n            cnt.attr_cnt,\n            COUNT(DISTINCT invalid.sys_attr_id) AS error_attr_cnt\n        FROM cbms.sys_device_attr_invalid invalid\n        JOIN cbms.sys_device_attr attr ON attr.sys_attr_id = invalid.sys_attr_id\n        JOIN cbms.sys_device d ON d.device_id = attr.device_id\n        LEFT JOIN geo.location l ON l.id = d.location_id\n        LEFT JOIN asset.asset_type asset_type ON asset_type.id = d.asset_type_id\n        LEFT JOIN ( \n            SELECT\n                _d.device_id,\n                COUNT(_attr.sys_attr_id) AS attr_cnt\n            FROM cbms.sys_device _d\n            JOIN cbms.sys_device_attr _attr ON _attr.device_id = _d.device_id AND _attr.temp_attr_id IS NOT NULL\n            WHERE _d.dc_id = #{dcId}\n            GROUP BY _d.device_id\n        ) cnt ON cnt.device_id = d.device_id\n        WHERE d.dc_id = #{dcId}\n        AND invalid.ctime BETWEEN #{startTime} AND #{endTime}\n        GROUP BY d.device_id\n        ORDER BY error_attr_cnt DESC\n    </select>\n\n    <select id="findInvalidDcAttrs" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDcAttrsResVO">\n        SELECT\n            temp.temp_attr_id,\n            temp.name AS temp_attr_name,\n            COUNT(DISTINCT attr.sys_attr_id) AS error_attr_cnt\n        FROM cbms.sys_device_attr attr\n        JOIN cbms.sys_device_attr_invalid invalid ON invalid.sys_attr_id = attr.sys_attr_id\n        JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id AND temp.is_del = 0\n        WHERE attr.dc_id = #{dcId}\n          AND invalid.ctime BETWEEN #{startTime} AND #{endTime}\n        GROUP BY temp.temp_attr_id\n    </select>\n\n    <select id="findInvalidAttrCnt" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorAttrCntResVO">\n        SELECT\n            invalid.ctime AS time,\n            COUNT(DISTINCT invalid.sys_attr_id) AS cnt\n        FROM cbms.sys_device_attr_invalid invalid\n        WHERE invalid.sys_attr_id = #{attrId}\n          AND invalid.ctime BETWEEN #{startTime} AND #{endTime}\n    </select>\n\n    <select id="findInvalidDeviceAttrs" resultType="com.gds.jpi.dcim.vo.DeviceAttrErrorDeviceAttrsResVO">\n        SELECT\n            attr.sys_attr_id AS attr_id,\n            attr.name AS attr_name,\n            attr.seq,\n            temp.temp_attr_id,\n            temp.name AS temp_attr_name,\n            temp.attr_type_id,\n            t.name AS attr_type_name\n        FROM cbms.sys_device d\n        JOIN cbms.sys_device_attr attr ON attr.device_id = d.device_id\n        JOIN cbms.sys_device_attr_invalid err ON err.sys_attr_id = attr.sys_attr_id\n        LEFT JOIN dcim.std_temp_attr temp ON temp.temp_attr_id = attr.temp_attr_id\n        LEFT JOIN dcim.std_attr_type_param t ON t.id = temp.attr_type_id\n        WHERE d.device_id = #{deviceId}\n          AND err.ctime BETWEEN #{startTime} AND #{endTime}\n    </select>\n\n</mapper>">\n            #{attrCode}\n        </foreach>\n    </insert>\n</mapper>",
+"details": []
+}
+
 ```
