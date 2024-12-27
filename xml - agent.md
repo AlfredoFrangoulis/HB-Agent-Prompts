@@ -5115,32 +5115,10 @@ Keep entities like &gt;, &lt;, &amp;, &lt;=, &gt;= and symbols such as backticks
 #### Output:
 
 ```json
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.gds.jpi.dcim.core.mapper.SysDeviceCombinationMapper">
-
-    <select id="list" resultType="com.gds.jpi.dcim.dto.SysDeviceCombinationDTO">
-        SELECT
-        sdc.combination_id ,
-        sdc.sequence,
-        aat.id composeDeviceTypeId ,
-        aat.name composeDeviceTypeName,
-        IFNULL(a.has_std, 0) composeDeviceHasStd,
-        aat2.id atomDeviceTypeId,
-        aat2.name atomDeviceTypeName,
-        IFNULL(b.has_std, 0) atomDeviceHasStd
-        FROM sys_device_combination sdc
-        LEFT JOIN asset.asset_type aat ON sdc.compose_device_type_code = aat.code
-        LEFT JOIN asset.asset_type aat2 ON sdc.atom_device_type_code = aat2.code
-        Left Join dcim.sys_device_type_detail a ON a.asset_type_id = aat.id
-        Left Join dcim.sys_device_type_detail b ON b.asset_type_id = aat2.id
-        <where>
-            <if test="deviceTypeId != null ">
-                aat.id = #{deviceTypeId}
-            </if>
-        </where>
-    </select>
-</mapper>
+{
+"translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace="com.gds.jpi.dcim.core.mapper.SysDeviceCombinationMapper">\n    <select id="list" resultType="com.gds.jpi.dcim.dto.SysDeviceCombinationDTO">\n        SELECT\n        sdc.combination_id ,\n        sdc.sequence,\n        aat.id composeDeviceTypeId ,\n        aat.`name` composeDeviceTypeName,\n        IFNULL(a.has_std, 0) composeDeviceHasStd,\n        aat2.id atomDeviceTypeId,\n        aat2.`name` atomDeviceTypeName,\n        IFNULL(b.has_std, 0) atomDeviceHasStd\n        FROM sys_device_combination sdc\n        LEFT JOIN asset.asset_type aat ON sdc.compose_device_type_code = aat.code\n        LEFT JOIN asset.asset_type aat2 ON sdc.atom_device_type_code = aat2.code\n        Left Join dcim.sys_device_type_detail a ON a.asset_type_id = aat.id\n        Left Join dcim.sys_device_type_detail b ON b.asset_type_id = aat2.id\n        <where>\n            <if test="deviceTypeId != null ">\n                aat.id = #{deviceTypeId}\n            </if>\n        </where>\n    </select>\n</mapper>",
+"details": []
+}
 
 ```
 
