@@ -1089,71 +1089,71 @@ export interface detailProps {
       "lineNumber": 16,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 记录列表",
-      "translatedText": " * Record list"
+      "originalText": "/**\n   * 记录列表\n   */",
+      "translatedText": "/**\n   * Record list\n   */"
     },
     {
       "lineNumber": 19,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 记录总数",
-      "translatedText": " * Total records"
+      "originalText": "/**\n   * 记录总数\n   */",
+      "translatedText": "/**\n   * Total records\n   */"
     },
     {
       "lineNumber": 32,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 甲方客户id",
-      "translatedText": " * Party A customer ID"
+      "originalText": "/**\n   * 甲方客户id\n   */",
+      "translatedText": "/**\n   * Party A customer ID\n   */"
     },
     {
       "lineNumber": 35,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 甲方客户名",
-      "translatedText": " * Party A customer name"
+      "originalText": "/**\n   * 甲方客户名\n   */",
+      "translatedText": "/**\n   * Party A customer name\n   */"
     },
     {
       "lineNumber": 38,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 异常flag",
-      "translatedText": " * Abnormal flag"
+      "originalText": "/**\n   * 异常flag\n   */",
+      "translatedText": "/**\n   * Abnormal flag\n   */"
     },
     {
       "lineNumber": 41,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 配电数量",
-      "translatedText": " * Power distribution quantity"
+      "originalText": "/**\n   * 配电数量\n   */",
+      "translatedText": "/**\n   * Power distribution quantity\n   */"
     },
     {
       "lineNumber": 44,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 机柜id",
-      "translatedText": " * Cabinet ID"
+      "originalText": "/**\n   * 机柜id\n   */",
+      "translatedText": "/**\n   * Cabinet ID\n   */"
     },
     {
       "lineNumber": 47,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 机柜名称",
-      "translatedText": " * Cabinet name"
+      "originalText": "/**\n 机柜名称\n   */",
+      "translatedText": "/**\n   * Cabinet name\n   */"
     },
     {
       "lineNumber": 50,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 合约电力",
-      "translatedText": " * Contract power"
+      "originalText": "/**\n   * 合约电力\n   */",
+      "translatedText": "/**\n   * Contract power\n   */"
     },
     {
       "lineNumber": 53,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": " * 采集时间",
-      "translatedText": " * Collection time"
+      "originalText": "/**\n   * 采集时间\n   */",
+      "translatedText": "/**\n   * Collection time\n   */"
     }
   ]
 }
