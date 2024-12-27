@@ -789,91 +789,91 @@ export interface processProps {
   "translatedCode": "export interface alarmProps {\n  alarmUnique?:string | null\n  breakTime?:string | null\n  confirmAccount?:string | null\n  confirmFlag?:number | null\n  dcId?:number | null\n  dcName:string | null\n  emergency?:number | null\n  eventId?:number | null\n  eventLevelId?:number | null\n  eventName?:string | null\n  eventTargetCategoryId?:number | null\n  eventTargetInstId?:number | null\n  eventTargetInstName:string | null\n  eventTargetTypeId?:number | null\n  eventTargetTypeName?:string | null\n  eventTypeId?:number | null\n  executeId?:number | null\n  id?:number\n  keyFlag?:number\n  lastEventLevelId?:number | null\n  locationFullName?:string | null\n  locationId?:number | null\n  locationName?:string | null\n  majorId?:number\n  messageType?:number\n  planFlag?:number\n  reasonDescr?:string | null\n  reasonTypeId?:number | null\n  recoverFlag?:number\n  seq?:number\n  tempEventId?: number\n  tempEventName?: string\n  updateTime?: string\n  new?: boolean\n  breakValue?: any\n  index?: any\n  timeoutEmergency?: any\n}\n\n/**\n * AlarmDetailDateRsp\n */\nexport interface dataLatestProps {\n  /**\n   * Alarm Detail ID\n   */\n  alarm_detail_id?: number;\n  /**\n   * Alarm ID\n   */\n  alarm_id?: number;\n  /**\n   * Precision\n   */\n  decimal_digit?: number;\n  /**\n   * Device ID\n   */\n  device_id?: number;\n  /**\n   * Device Name\n   */\n  device_name?: string;\n  /**\n   * Enum Value Name\n   */\n  enum_name?: string;\n  /**\n   * Enum Type Code\n   */\n  enum_type_code?: string;\n  /**\n   * Enum Value Code\n   */\n  enum_value_code?: string;\n  /**\n   * Display Value\n   */\n  show_value?: string;\n  /**\n   * System Attribute ID\n   */\n  sys_attr_id?: number;\n  /**\n   * System Attribute Name\n   */\n  sys_attr_name?: string;\n  /**\n   * Unit\n   */\n  unit?: string;\n  /**\n   * Collected Value\n   */\n  value?: number;\n}\n\n/**\n * StdTempEventDebugGuide\n */\nexport interface debugGuideProps {\n  /**\n   * Troubleshooting Guide Content\n   */\n  content?: string;\n  /**\n   * Primary Key\n   */\n  id?: number;\n  /**\n   * Sort Order\n   */\n  order_by?: number;\n  /**\n   * Event Template ID\n   */\n  temp_event_id?: number;\n}\n\n/**\n * EventInstRuleTransRsp\n */\nexport interface translationProps {\n  /**\n   * Data Center ID\n   */\n  dc_id?: number;\n  /**\n   * Event Instance ID\n   */\n  event_id?: number;\n  /**\n   * Event Level ID\n   */\n  event_level_id?: number;\n  /**\n   * Trigger Rule\n   */\n  fire_rule?: string;\n  /**\n   * Translated Trigger Rule\n   */\n  fire_rule_show?: string;\n  /**\n   * Rule Instance ID\n   */\n  id?: number;\n  /**\n   * Recovery Rule\n   */\n  recovery_rule?: string;\n  /**\n   * Translated Recovery Rule\n   */\n  recovery_rule_show?: string;\n  /**\n   * Rule Description\n   */\n  temp_event_rule_descr?: string;\n  /**\n   * Rule Template ID\n   */\n  temp_event_rule_id?: number;\n  /**\n   * Rule Template Name\n   */\n  temp_event_rule_name?: string;\n  /**\n   * Trigger Rule Template\n   */\n  temp_fire_rule?: string;\n  /**\n   * Recovery Rule Template\n   */\n  temp_recovery_rule?: string;\n  fire_delay?: number;\n  recovery_delay?: number;\n}\n\n// Plan Order\nexport interface planProps {\n  dcId?: number\n  dcName?: string\n  endTime?: string\n  id?: number\n  planNo?: string\n  planTargetList?: any\n  planTitle?:string\n  planTypeId?:number\n  planTypeName?:string\n  startTime?:string\n  status?:number\n}\n\n/**\n* AttrDataProps\n */\nexport interface attrDataProps {\n  /**\n   * Alarm Detail ID\n   */\n  alarm_detail_id?: number;\n  /**\n   * Alarm ID\n   */\n  alarm_id?: number;\n  /**\n   * Precision\n   */\n  decimal_digit?: number;\n  /**\n   * Device ID\n   */\n  device_id?: number;\n  /**\n   * Device Name\n   */\n  device_name?: string;\n  /**\n   * Enum Value Name\n   */\n  enum_name?: string;\n  /**\n   * Enum Type Code\n   */\n  enum_type_code?: string;\n  /**\n   * Enum Value Code\n   */\n  enum_value_code?: string;\n  /**\n   * Display Value\n   */\n  show_value?: string;\n  /**\n   * System Attribute ID\n   */\n  sys_attr_id?: number;\n  /**\n   * System Attribute Name\n   */\n  sys_attr_name?: string;\n  /**\n   * Unit\n   */\n  unit?: string;\n  /**\n   * Collected Value\n   */\n  value?: number;\n}\n\n/**\n * AlarmProcessDetailRsp\n */\nexport interface processProps {\n  /**\n   * Operating Parameter Value\n   */\n  attr_data?: attrDataProps[];\n  /**\n   * Occurrence Time\n   */\n  break_time?: Date;\n  /**\n   * Alarm Detail ID\n   */\n  detail_id?: number;\n  /**\n   * Event Instance ID\n   */\n  event_id?: number;\n  /**\n   * Event Level Code\n   */\n  event_level_code?: string;\n  /**\n   * Event Level ID\n   */\n  event_level_id?: number;\n  /**\n   * Event Level Name\n   */\n  event_level_name?: string;\n  /**\n   * Message Type Code\n   */\n  message_type_code?: string;\n  /**\n   * Message Type ID\n   */\n  message_type_id?: number;\n  /**\n   * Message Type Name\n   */\n  message_type_name?: string;\n}",
   "details": [
     {
-      "lineNumber": 16,
+      "lineNumber": 45,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 告警详情id\n   */",
       "translatedText": "/**\n   * Alarm Detail ID\n   */"
     },
     {
-      "lineNumber": 18,
+      "lineNumber": 49,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 告警id\n   */",
       "translatedText": "/**\n   * Alarm ID\n   */"
     },
     {
-      "lineNumber": 20,
+      "lineNumber": 53,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 精度\n   */",
       "translatedText": "/**\n   * Precision\n   */"
     },
     {
-      "lineNumber": 22,
+      "lineNumber": 57,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 设备id\n   */",
       "translatedText": "/**\n   * Device ID\n   */"
     },
     {
-      "lineNumber": 24,
+      "lineNumber": 61,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 设备名\n   */",
       "translatedText": "/**\n   * Device Name\n   */"
     },
     {
-      "lineNumber": 26,
+      "lineNumber": 65,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 枚举值名称\n   */",
       "translatedText": "/**\n   * Enum Value Name\n   */"
     },
     {
-      "lineNumber": 28,
+      "lineNumber": 69,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 枚举类型code\n   */",
       "translatedText": "/**\n   * Enum Type Code\n   */"
     },
     {
-      "lineNumber": 30,
+      "lineNumber": 73,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 枚举值code\n   */",
       "translatedText": "/**\n   * Enum Value Code\n   */"
     },
     {
-      "lineNumber": 32,
+      "lineNumber": 77,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 展示值\n   */",
       "translatedText": "/**\n   * Display Value\n   */"
     },
     {
-      "lineNumber": 34,
+      "lineNumber": 81,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 运行参数id\n   */",
       "translatedText": "/**\n   * System Attribute ID\n   */"
     },
     {
-      "lineNumber": 36,
+      "lineNumber": 85,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 运行参数名\n   */",
       "translatedText": "/**\n   * System Attribute Name\n   */"
     },
     {
-      "lineNumber": 38,
+      "lineNumber": 89,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 单位\n   */",
       "translatedText": "/**\n   * Unit\n   */"
     },
     {
-      "lineNumber": 40,
+      "lineNumber": 93,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n   * 采集值\n   */",
