@@ -1596,13 +1596,92 @@ export interface instDetailProps {
 #### Input:
 
 ```typescript
+import request from '@/plugins/axios'
 
+/**
+ * 获取菜单列表
+ * @param account
+ * @param function_type
+ * @returns {*}
+ */
+// export function getMenus(account, function_type?) {
+//   return request.get('/jpi/dcim/auth/menus', {
+//     params: {
+//       account,
+//       function_type
+//     }
+//   })
+// }
+export function getMenus() {
+  return request.get('/jpi/dcim/auth/v2/menus')
+}
+
+/**
+ * 查询用户名
+ */
+export function myInfo(username) {
+  return request.get('/oauth/token/myinfo', {
+    params: {
+      username
+    }
+  })
+}
+
+// 获取用户的权限列表
+export function getDcFuncs(dc_id?) {
+  return request.get('/jpi/dcim/auth/v2/dc_functions', {
+    params: {
+      dc_id
+    }
+  })
+}
+
+// 获取用户有某个权限的数据中心列表
+export function getFuncDcs(function_code) {
+  return request.get('/jpi/dcim/auth/v2/function_dcs', {
+    params: {
+      function_code
+    }
+  })
+}
 ```
 
 #### Output:
 
 ```json
-
+{
+  "translatedCode": "import request from '@/plugins/axios'\n\n/**\n * Get menu list\n * @param account\n * @param function_type\n * @returns {*}\n */\n// export function getMenus(account, function_type?) {\n//   return request.get('/jpi/dcim/auth/menus', {\n//     params: {\n//       account,\n//       function_type\n//     }\n//   })\n// }\nexport function getMenus() {\n  return request.get('/jpi/dcim/auth/v2/menus')\n}\n\n/**\n * Query username\n */\nexport function myInfo(username) {\n  return request.get('/oauth/token/myinfo', {\n    params: {\n      username\n    }\n  })\n}\n\n// Get the user's list of permissions\nexport function getDcFuncs(dc_id?) {\n  return request.get('/jpi/dcim/auth/v2/dc_functions', {\n    params: {\n      dc_id\n    }\n  })\n}\n\n// Get the list of data centers where the user has a specific permission\nexport function getFuncDcs(function_code) {\n  return request.get('/jpi/dcim/auth/v2/function_dcs', {\n    params: {\n      function_code\n    }\n  })\n}",
+  "details": [
+    {
+      "lineNumber": 4,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "获取菜单列表",
+      "translatedText": "Get menu list"
+    },
+    {
+      "lineNumber": 22,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "查询用户名",
+      "translatedText": "Query username"
+    },
+    {
+      "lineNumber": 32,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "获取用户的权限列表",
+      "translatedText": "Get the user's list of permissions"
+    },
+    {
+      "lineNumber": 41,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "获取用户有某个权限的数据中心列表",
+      "translatedText": "Get the list of data centers where the user has a specific permission"
+    }
+  ]
+}
 ```
 
 ### DEMOS10
