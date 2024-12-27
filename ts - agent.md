@@ -383,29 +383,29 @@ export function trendency(params) {
       "lineNumber": 4,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": "查询机柜报表列表",
-      "translatedText": "Query cabinet report list"
+      "originalText": "/**\n *查询机柜报表列表\n * @param {*} params\n * @returns\n */",
+      "translatedText": "/**\n * Query cabinet report list\n * @param {*} params\n * @returns\n */"
     },
     {
       "lineNumber": 11,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": "获取机柜配电检测结果字典",
-      "translatedText": "Get cabinet power distribution check result dictionary"
+      "originalText": "// 获取机柜配电检测结果字典",
+      "translatedText": "// Get cabinet power distribution check result dictionary"
     },
     {
       "lineNumber": 15,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": "机柜配电导出",
-      "translatedText": "Cabinet power distribution export"
+      "originalText": "// 机柜配电导出",
+      "translatedText": "// Cabinet power distribution export"
     },
     {
       "lineNumber": 19,
       "lineType": "comment",
       "jobType": "Text Translation",
-      "originalText": "趋势图",
-      "translatedText": "Trend chart"
+      "originalText": "// 趋势图",
+      "translatedText": "// Trend chart"
     }
   ]
 }
