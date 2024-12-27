@@ -268,7 +268,7 @@ export function sendNotice(data) {
   "translatedCode": "import request from '@/plugins/axios-last'\n\n// Get location information based on data center\nexport function getLocationTree(dcId) {\n  return request.get('/api/v3/infra-database-backend/geo/batch/dc_location', { params: { dcId } })\n}\n\n/**\n * Query rule details for a specific level of an instance (including translations)\n * @returns\n */\nexport function translationDetail({ event_id, event_level_id }) {\n  return request.get('/jpi/dcim/event/inst/translation_detail', {\n    params: {\n      event_id, event_level_id\n    }\n  })\n}\n\n/**\n * Query alarm history\n * @returns\n */\nexport function processDetail(alarm_id) {\n  return request.get('/jpi/dcim/alarm/process_detail', {\n    params: {\n      alarm_id\n    }\n  })\n}\n\n/**\n * Get the runtime parameter instance list of the device\n * @returns\n */\nexport function instAttrs(device_id) {\n  return request.get('/jpi/dcim/device/attr/inst_attrs', {\n    params: {\n      device_id\n    }\n  })\n}\n\n/**\n * Query the indicator instance list of the cabinet\n * @returns\n */\nexport function instIndis(cabinet_id) {\n  return request.get('/jpi/dcim/cabinet/indi/indis', {\n    params: {\n      cabinet_id\n    }\n  })\n}\n\n/**\n * Get the latest running status of the alarm device\n * @returns\n */\nexport function dataLatest(alarmIds) {\n  return request.get('/jpi/dcim/alarm/detail/data_latest', {\n    params: {\n      alarmIds\n    }\n  })\n}\n\n/**\n * Get Event template troubleshooting guide\n * @returns\n */\nexport function debugGuide(temp_event_id) {\n  return request.get('/jpi/dcim/temp/event/debug_guide', {\n    params: {\n      temp_event_id\n    }\n  })\n}\n\n// Focus alarm\nexport function concern(alarm_id) {\n  return request.post(`/jpi/dcim/alarm/handler/concern?alarm_id=${alarm_id}`)\n}\n\n// Unfocus alarm\nexport function unConcern(alarm_id) {\n  return request.post(`/jpi/dcim/alarm/handler/unconcern?alarm_id=${alarm_id}`)\n}\n\n// Confirm alarm\nexport function confirm(data) {\n  return request.post('/jpi/dcim/alarm/handler/confirm', data)\n}\n\n// Confirm alarm by subject\nexport function targetConfirm(data) {\n  return request.post('/jpi/dcim/alarm/handler/target/confirm', data)\n}\n\n// Reason type dictionary\nexport function reasonDict() {\n  return request.get('/jpi/dcim/alarm/handler/reason/type')\n}\n\n// Query reason\nexport function reasonAlarm(alarm_id) {\n  return request.get(`/jpi/dcim/alarm/handler/reason?alarm_id=${alarm_id}`)\n}\n\n// Update reason\nexport function updateReason(data) {\n  return request.post('/jpi/dcim/alarm/handler/update/reason', data)\n}\n\n// Update reason for the alarm subject\nexport function updateTargetReason(data) {\n  return request.post('/jpi/dcim/alarm/handler/target/update/reason', data)\n}\n\n// Fuzzy query based on data center and keyword\nexport function unionSearch(params) {\n  return request.get('/jpi/dcim/device/union', { params })\n}\n\nexport function unionSearchCabinets(params) {\n  params = Object.assign(params, { search_type: 1 })\n  return request.get('/jpi/dcim/cabinet/union', { params })\n}\n\n// Get device list\nexport function getDevices(params) {\n  return request.get('/jpi/dcim/device/deviceList', { params })\n}\n\n// Get cabinet list\nexport function getCabinets(params) {\n  return request.get('/jpi/dcim/cabinet/cabinets', { params })\n}\n\n// Get device details\nexport function getDeviceDetail(id) {\n  return request.get(`/jpi/dcim/device/${id}`)\n}\n// Get cabinet details\nexport function getCabinetDetail(id) {\n  return request.get(`/jpi/dcim/cabinet/${id}`)\n}\n\n// Get cabinet power distribution\nexport function getCabinetAttr(id) {\n  return request.get(`/jpi/dcim/cabinet/attr/data?limit=0&offset=0&cabinet_id=${id}`)\n}\n\n// Trigger emergency\nexport function handlerEmer(alarm_id) {\n  return request.post(`/jpi/dcim/alarm/handler/emergency?alarm_id=${alarm_id}`)\n}\n\n// Get the list of affected customers\nexport function influenceCustomer(alarm_id) {\n  return request.get(`/jpi/dcim/alarm/influence/customer?alarm_id=${alarm_id}`)\n}\n\n// Get plan type\nexport function getPlanType() {\n  return request.get('/jpi/dcim/alarm/plan/type')\n}\n\n// One-click incident handling\nexport function handleIncident(alarm_id) {\n  return request.post(`/jpi/dcim/alarm/handler/incident?alarmId=${alarm_id}`)\n}\n\n// Batch close recovered alarms\nexport function batchCloseRecovered(data) {\n  return request.post('/jpi/dcim/alarm/handler/confirm/recovered/batch', data)\n}\n\n// Batch close unrecovered alarms\nexport function batchCloseUnRecovered(data) {\n  return request.post('/jpi/dcim/alarm/handler/confirm/unrecovered/batch', data)\n}\n\n// Batch close message alarms\nexport function batchCloseMessage(data) {\n  return request.post('/jpi/dcim/alarm/handler/confirm/message/batch', data)\n}\n\n// Get emergency list\nexport function emergencyAlarm() {\n  return request.get('/jpi/dcim/alarm/handler/emergency/alarm')\n}\n\n// Simulate alarm recovery\nexport function simulateRecover(alarm_id) {\n  return request.post(`/jpi/dcim/alarm/handler/simulate/recover?alarm_id=${alarm_id}`)\n}\n\n// Get alarm operation log\nexport function getLog(alarm_id) {\n  return request.get(`/jpi/dcim/alarm/log?alarm_id=${alarm_id}`)\n}\n\n// Get emergency list\nexport function getEmerList() {\n  return request.get('/jpi/dcim/alarm/handler/emergency/list')\n}\n\n// Query current AI control status\nexport function aiStatus() { // Production Changshu No. 2 is 141\n  return request.get(`/jpi/dcim/ai_control/status?dc_id=${141}`)\n}\n\n// Change AI control mode\nexport function changeAiStatus(data) {\n  return request.post('/jpi/dcim/ai_control/change', data)\n}\n\n// Query old alarm count\nexport function oldAlarmCount() {\n  return request.get('/jpi/dcim/alarm/handler/old/alarm_count')\n}\n\n// Get the number of unconfirmed alarms\nexport function oldUnconfirmCount() {\n  return request.get('/jpi/dcim/alarm/handler/old/unConfirm_count')\n}\n\n// Normal notification\nexport function sendNotice(data) {\n  return request.post('/jpi/dcim/alarm/handler/normal/notice', data)\n}\n",
   "details": [
     {
-      "lineNumber": 2,
+      "lineNumber": 3,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "// 根据数据中心获取位置信息",
@@ -282,56 +282,56 @@ export function sendNotice(data) {
       "translatedText": "/**\n * Query rule details for a specific level of an instance (including translations)\n * @returns\n */"
     },
     {
-      "lineNumber": 15,
+      "lineNumber": 20,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n * 查询告警历程\n * @returns\n */",
       "translatedText": "/**\n * Query alarm history\n * @returns\n */"
     },
     {
-      "lineNumber": 21,
+      "lineNumber": 32,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n * 获取设备的运行参数实例列表\n * @returns\n */",
       "translatedText": "/**\n * Get the runtime parameter instance list of the device\n * @returns\n */"
     },
     {
-      "lineNumber": 28,
+      "lineNumber": 44,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n * 查询机柜指标实例列表\n * @returns\n */",
       "translatedText": "/**\n * Query the indicator instance list of the cabinet\n * @returns\n */"
     },
     {
-      "lineNumber": 35,
+      "lineNumber": 56,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n * 获取告警设备最新运行情况\n * @returns\n */",
       "translatedText": "/**\n * Get the latest running status of the alarm device\n * @returns\n */"
     },
     {
-      "lineNumber": 42,
+      "lineNumber": 68,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "/**\n * 获取Event模板排障指引\n * @returns\n */",
       "translatedText": "/**\n * Get Event template troubleshooting guide\n * @returns\n */"
     },
     {
-      "lineNumber": 49,
+      "lineNumber": 80,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "// 关注告警",
       "translatedText": "// Focus alarm"
     },
     {
-      "lineNumber": 53,
+      "lineNumber": 85,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "// 取消关注告警",
       "translatedText": "// Unfocus alarm"
     },
     {
-      "lineNumber": 57,
+      "lineNumber": 90,
       "lineType": "comment",
       "jobType": "Text Translation",
       "originalText": "// 确认告警",
