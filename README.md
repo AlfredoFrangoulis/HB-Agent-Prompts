@@ -1,6 +1,6 @@
 # HIVE BRIDGE AI TRANSLATOR
 
-> ## **`📢❗🚨 57.14285714285714% DONE IKUZOOOOO 🚨📢❗`**
+> ## **`📢❗🚨 71.42857142857143% DONE IKUZOOOOO 🚨📢❗`**
 
 ## Tech Stack
 
@@ -22,8 +22,8 @@
 - [x] JAVA
 - [x] TS / JS / ECMASCRIPT
 - [x] XML
-- [x] YML - Finish maybe, still tweaking 🚨
-- [ ] SQL - ON PROGRESS 🚨
+- [x] YML
+- [x] SQL
 - [ ] VUE - ON PROGRESS 🚨
 - [ ] Properties - ON PROGRESS 🚨
 - [ ] Chinese Logic Agent Training Prompts 💀
