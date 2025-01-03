@@ -12,7 +12,7 @@
 - BACKEND
   - HZERO
 - FRONTEND
-  - https://hive-bridge.vercel.app/
+  - https://hive-bridge.miauuu.tech/
     - NEXT JS (_TEMPORARY FOR DEVELOPMENT_)
 
 ## TODO
