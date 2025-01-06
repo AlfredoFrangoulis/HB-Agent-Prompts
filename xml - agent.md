@@ -877,3 +877,1041 @@ When wrapping XML content into JSON strings, ensure all single quotes (') in val
 }
 
 ```
+
+### DEMOS5
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.alarm.AlarmInfluenceCustomerMapper">
+    <select id="getRoomLocIds" resultType="java.lang.Integer">
+        SELECT
+            ll.id
+        FROM
+            geo.location l
+        JOIN
+            geo.location_type lt ON lt.type_id = l.sp_type
+        JOIN
+            geo.location_category lc ON lc.id = lt.category_id AND lc.code = 'gsac.location_category.modules'
+        LEFT JOIN
+            geo.location ll ON ll.`left` &gt;= l.`left` AND ll.`right` &lt;= l.`right` AND ll.status = 1
+        WHERE
+            l.status = 1
+            AND l.id IN
+            <foreach collection="locationIds" item="locationId" open="(" separator="," close=")">
+                #{locationId}
+            </foreach>
+    </select>
+    <select id="getAssetTypeByRoot" resultType="com.gds.jpi.dcim.vo.alarm.AssetTypeRoot">
+        SELECT
+            t.id AS root_type_id,
+            t.code AS root_type_code,
+            tc.id AS type_id
+        FROM
+            asset.asset_type t
+        JOIN
+            asset.asset_type tc ON tc.`left` &gt;= t.`left` AND tc.`right` &lt;=t.`right` AND tc.is_delete = 0
+        WHERE
+            t.is_delete = 0
+            AND t.code IN
+            <foreach collection="typeCodes" item="typeCode" open="(" separator="," close=")">
+                #{typeCode}
+            </foreach>
+    </select>
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+  "translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace=\"com.gds.jpi.dcim.core.mapper.alarm.AlarmInfluenceCustomerMapper\">\n    <select id=\"getRoomLocIds\" resultType=\"java.lang.Integer\">\n        SELECT\n            ll.id\n        FROM\n            geo.location l\n        JOIN\n            geo.location_type lt ON lt.type_id = l.sp_type\n        JOIN\n            geo.location_category lc ON lc.id = lt.category_id AND lc.code = 'gsac.location_category.modules'\n        LEFT JOIN\n            geo.location ll ON ll.`left` &gt;= l.`left` AND ll.`right` &lt;= l.`right` AND ll.status = 1\n        WHERE\n            l.status = 1\n            AND l.id IN\n            <foreach collection=\"locationIds\" item=\"locationId\" open=\"(\" separator=\",\" close=\")\">\n                #{locationId}\n            </foreach>\n    </select>\n    <select id=\"getAssetTypeByRoot\" resultType=\"com.gds.jpi.dcim.vo.alarm.AssetTypeRoot\">\n        SELECT\n            t.id AS root_type_id,\n            t.code AS root_type_code,\n            tc.id AS type_id\n        FROM\n            asset.asset_type t\n        JOIN\n            asset.asset_type tc ON tc.`left` &gt;= t.`left` AND tc.`right` &lt;=t.`right` AND tc.is_delete = 0\n        WHERE\n            t.is_delete = 0\n            AND t.code IN\n            <foreach collection=\"typeCodes\" item=\"typeCode\" open=\"(\" separator=\",\" close=\")\">\n                #{typeCode}\n            </foreach>\n    </select>\n</mapper>",
+  "details": []
+}
+```
+
+### DEMOS6
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.AlarmInnerMapper">
+    <select id="selectInnerMatrix" parameterType="com.gds.jpi.dcim.vo.AlarmInnerGetReqVO"
+            resultType="com.gds.jpi.dcim.vo.AlarmInnerNoticeVO">
+        SELECT DISTINCT
+        adrr.id AS innerId,
+        sa.name AS accountName,
+        adrr.account AS account,
+        gdc.gid AS dcGid,
+        gdc.short_name AS dcLimitation,
+        ar.id AS roleId,
+        ar.name AS roleName,
+        ar.role_type_id AS roleTypeId,
+        ar.phone_priority AS phonePriority,
+        apd.id AS priorityId,
+        apd.name AS priorityName,
+        m.id AS majorId,
+        m.name AS majorName
+        FROM cbms.alarm_notice_account_dc_role_r adrr
+        LEFT JOIN sms.account sa ON adrr.account = sa.account
+        LEFT JOIN geo.dc_tree gdc ON adrr.dc_gid = gdc.gid
+        LEFT JOIN geo.dc_tree dct ON dct.gid >= gdc.min_id  AND gdc.max_id >=dct.gid
+        LEFT JOIN cbms.alarm_notice_role ar ON adrr.role_id = ar.id
+        LEFT JOIN dcim.dict_major m ON adrr.major_id = m.id
+        LEFT JOIN cbms.alarm_notice_priority_dict apd ON adrr.priority = apd.id
+        <if test="noticeLevelIds != null and noticeLevelIds.size() != 0">
+            LEFT JOIN cbms.alarm_notice_rule nr ON ar.id = nr.role_id
+        </if>
+        <where>
+            AND ar.status = 1
+            <if test="null != account and '' != account">
+                AND sa.account = #{account}
+            </if>
+            <if test="null != dcGid">
+                AND gdc.max_id &gt;= #{dcGid}
+                AND gdc.min_id &lt;= #{dcGid}
+            </if>
+            <if test="null != roleIds and roleIds.size() > 0">
+                AND ar.id IN
+                <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+                    #{roleId}
+                </foreach>
+            </if>
+            <if test="null != priority">
+                AND apd.id = #{priority}
+            </if>
+            <if test="null != majorIds and majorIds.size() > 0">
+                AND m.id IN
+                <foreach collection="majorIds" item="majorId" open="(" separator="," close=")">
+                    #{majorId}
+                </foreach>
+            </if>
+            <if test="dcIds != null and dcIds.size() != 0">
+                AND dct.dc_id IN
+                <foreach collection="dcIds" item="dcId" open="(" separator="," close=")">
+                    #{dcId}
+                </foreach>
+            </if>
+            <if test="dcGids != null and dcGids.size() != 0">
+                AND gdc.gid IN
+                <foreach collection="dcGids" item="dcGid" open="(" separator="," close=")">
+                    #{dcGid}
+                </foreach>
+            </if>
+            <if test="noticeLevelIds != null and noticeLevelIds.size() != 0">
+                AND nr.notice_level_id IN
+                <foreach collection="noticeLevelIds" item="noticeLevelId" open="(" separator="," close=")">
+                    #{noticeLevelId}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY gdc.gid, ar.role_type_id DESC, CONVERT(ar.name using gbk), m.id, apd.id, CONVERT(sa.name using gbk)
+    </select>
+
+    <select id="queryInnerMatrix" parameterType="com.gds.jpi.dcim.vo.AlarmInnerGetReqVO"
+            resultType="com.gds.jpi.dcim.vo.AlarmInnerNoticeVO">
+        SELECT
+        rel.id AS innerId,
+        a.name AS accountName,
+        rel.account AS account,
+        pp.gid AS dcGid,
+        pp.short_name AS dcLimitation,
+        role.id AS roleId,
+        role.name AS roleName,
+        role.role_type_id AS roleTypeId,
+        role.phone_priority AS phonePriority,
+        apd.id AS priorityId,
+        apd.name AS priorityName,
+        m.id AS majorId,
+        m.name AS majorName,
+        a.email as email
+        FROM
+        dcim.event_notice_level l  <!-- 通知等级 -->
+        INNER JOIN
+        cbms.alarm_notice_rule rule ON rule.notice_level_id = l.id <!-- 根据通知等级关联相应通知规则 -->
+        INNER JOIN
+        cbms.alarm_notice_role role ON role.id = rule.role_id <!-- 匹配相应通知规则中的通知角色-->
+        INNER JOIN
+        cbms.alarm_notice_account_dc_role_r rel ON rel.role_id = role.id <!-- 根据角色初步筛选到人-->
+        INNER JOIN
+        (
+        <!-- 结合dc_id的条件匹配数据中心运营主数据中的DC这一级 -->
+        <!-- 关联所有上级节点（全国-区域-园区-数据中心）-->
+        SELECT DISTINCT p.* FROM geo.dc_tree t
+        INNER JOIN geo.dc_tree p ON p.min_id &lt;= t.gid AND p.max_id &gt;= t.gid
+        WHERE 1=1
+        <!-- 配置数据中心运营主数据中的DC级 -->
+        <if test="dcIds != null and dcIds.size() != 0">
+            AND t.dc_id IN
+            <foreach collection="dcIds" item="dcId" open="(" separator="," close=")">
+                #{dcId}
+            </foreach>
+        </if>
+        ) pp ON rel.dc_gid = pp.gid
+        <!-- 配置通知人的账户 -->
+        LEFT JOIN
+        sms.account a ON a.account = rel.account
+        <!-- 配置通知人的专业，通知人可能无对应专业 -->
+        LEFT JOIN
+        dcim.dict_major m ON rel.major_id = m.id
+        <!-- 配置通知人的A/B角，通知人可能无A/B角 -->
+        LEFT JOIN
+        cbms.alarm_notice_priority_dict apd ON rel.priority = apd.id
+        WHERE
+        a.status = 1 <!-- 账户必须有效 -->
+        AND role.status = 1 <!-- 角色必须有效 -->
+        <!-- 根据通知等级找到对应的通知规则 -->
+        <if test="noticeLevelIds != null and noticeLevelIds.size() != 0">
+            AND rule.notice_level_id IN
+            <foreach collection="noticeLevelIds" item="noticeLevelId" open="(" separator="," close=")">
+                #{noticeLevelId}
+            </foreach>
+        </if>
+        <!-- 根据专业筛选合适的同志人，有的通知人是没有专业的 -->
+        <if test="null != majorIds and majorIds.size() > 0">
+            AND (
+                m.id IN
+            <foreach collection="majorIds" item="majorId" open="(" separator="," close=")">
+                #{majorId}
+            </foreach>
+                OR m.id IS NULL
+                )
+        </if>
+    </select>
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+  "translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace=\"com.gds.jpi.dcim.core.mapper.AlarmInnerMapper\">\n    <select id=\"selectInnerMatrix\" parameterType=\"com.gds.jpi.dcim.vo.AlarmInnerGetReqVO\"\n            resultType=\"com.gds.jpi.dcim.vo.AlarmInnerNoticeVO\">\n        SELECT DISTINCT\n        adrr.id AS innerId,\n        sa.name AS accountName,\n        adrr.account AS account,\n        gdc.gid AS dcGid,\n        gdc.short_name AS dcLimitation,\n        ar.id AS roleId,\n        ar.name AS roleName,\n        ar.role_type_id AS roleTypeId,\n        ar.phone_priority AS phonePriority,\n        apd.id AS priorityId,\n        apd.name AS priorityName,\n        m.id AS majorId,\n        m.name AS majorName\n        FROM cbms.alarm_notice_account_dc_role_r adrr\n        LEFT JOIN sms.account sa ON adrr.account = sa.account\n        LEFT JOIN geo.dc_tree gdc ON adrr.dc_gid = gdc.gid\n        LEFT JOIN geo.dc_tree dct ON dct.gid >= gdc.min_id  AND gdc.max_id >=dct.gid\n        LEFT JOIN cbms.alarm_notice_role ar ON adrr.role_id = ar.id\n        LEFT JOIN dcim.dict_major m ON adrr.major_id = m.id\n        LEFT JOIN cbms.alarm_notice_priority_dict apd ON adrr.priority = apd.id\n        <if test=\"noticeLevelIds != null and noticeLevelIds.size() != 0\">\n            LEFT JOIN cbms.alarm_notice_rule nr ON ar.id = nr.role_id\n        </if>\n        <where>\n            AND ar.status = 1\n            <if test=\"null != account and '' != account\">\n                AND sa.account = #{account}\n            </if>\n            <if test=\"null != dcGid\">\n                AND gdc.max_id &gt;= #{dcGid}\n                AND gdc.min_id &lt;= #{dcGid}\n            </if>\n            <if test=\"null != roleIds and roleIds.size() > 0\">\n                AND ar.id IN\n                <foreach collection=\"roleIds\" item=\"roleId\" open=\"(\" separator=\",\" close=\")\">\n                    #{roleId}\n                </foreach>\n            </if>\n            <if test=\"null != priority\">\n                AND apd.id = #{priority}\n            </if>\n            <if test=\"null != majorIds and majorIds.size() > 0\">\n                AND m.id IN\n                <foreach collection=\"majorIds\" item=\"majorId\" open=\"(\" separator=\",\" close=\")\">\n                    #{majorId}\n                </foreach>\n            </if>\n            <if test=\"dcIds != null and dcIds.size() != 0\">\n                AND dct.dc_id IN\n                <foreach collection=\"dcIds\" item=\"dcId\" open=\"(\" separator=\",\" close=\")\">\n                    #{dcId}\n                </foreach>\n            </if>\n            <if test=\"dcGids != null and dcGids.size() != 0\">\n                AND gdc.gid IN\n                <foreach collection=\"dcGids\" item=\"dcGid\" open=\"(\" separator=\",\" close=\")\">\n                    #{dcGid}\n                </foreach>\n            </if>\n            <if test=\"noticeLevelIds != null and noticeLevelIds.size() != 0\">\n                AND nr.notice_level_id IN\n                <foreach collection=\"noticeLevelIds\" item=\"noticeLevelId\" open=\"(\" separator=\",\" close=\")\">\n                    #{noticeLevelId}\n                </foreach>\n            </if>\n        </where>\n        ORDER BY gdc.gid, ar.role_type_id DESC, CONVERT(ar.name using gbk), m.id, apd.id, CONVERT(sa.name using gbk)\n    </select>\n\n    <select id=\"queryInnerMatrix\" parameterType=\"com.gds.jpi.dcim.vo.AlarmInnerGetReqVO\"\n            resultType=\"com.gds.jpi.dcim.vo.AlarmInnerNoticeVO\">\n        SELECT\n        rel.id AS innerId,\n        a.name AS accountName,\n        rel.account AS account,\n        pp.gid AS dcGid,\n        pp.short_name AS dcLimitation,\n        role.id AS roleId,\n        role.name AS roleName,\n        role.role_type_id AS roleTypeId,\n        role.phone_priority AS phonePriority,\n        apd.id AS priorityId,\n        apd.name AS priorityName,\n        m.id AS majorId,\n        m.name AS majorName,\n        a.email as email\n        FROM\n        dcim.event_notice_level l  <!-- Notification level -->\n        INNER JOIN\n        cbms.alarm_notice_rule rule ON rule.notice_level_id = l.id <!-- Associate notification rules based on notification level -->\n        INNER JOIN\n        cbms.alarm_notice_role role ON role.id = rule.role_id <!-- Match the notification role in the corresponding notification rule-->\n        INNER JOIN\n        cbms.alarm_notice_account_dc_role_r rel ON rel.role_id = role.id <!-- Preliminary screening of people based on role-->\n        INNER JOIN\n        (\n        <!-- Combine the condition of dc_id to match the data center operation master data at the DC level -->\n        <!-- Associate all parent nodes (National-Region-Park-Data Center)-->\n        SELECT DISTINCT p.* FROM geo.dc_tree t\n        INNER JOIN geo.dc_tree p ON p.min_id &lt;= t.gid AND p.max_id &gt;= t.gid\n        WHERE 1=1\n        <!-- Configure the DC level in the data center operation master data -->\n        <if test=\"dcIds != null and dcIds.size() != 0\">\n            AND t.dc_id IN\n            <foreach collection=\"dcIds\" item=\"dcId\" open=\"(\" separator=\",\" close=\")\">\n                #{dcId}\n            </foreach>\n        </if>\n        ) pp ON rel.dc_gid = pp.gid\n        <!-- Configure the notification person's account -->\n        LEFT JOIN\n        sms.account a ON a.account = rel.account\n        <!-- Configure the notification person's major, the notification person may not have a corresponding major -->\n        LEFT JOIN\n        dcim.dict_major m ON rel.major_id = m.id\n        <!-- Configure the notification person's A/B role, the notification person may not have an A/B role -->\n        LEFT JOIN\n        cbms.alarm_notice_priority_dict apd ON rel.priority = apd.id\n        WHERE\n        a.status = 1 <!-- The account must be valid -->\n        AND role.status = 1 <!-- The role must be valid -->\n        <!-- Find the corresponding notification rule based on the notification level -->\n        <if test=\"noticeLevelIds != null and noticeLevelIds.size() != 0\">\n            AND rule.notice_level_id IN\n            <foreach collection=\"noticeLevelIds\" item=\"noticeLevelId\" open=\"(\" separator=\",\" close=\")\">\n                #{noticeLevelId}\n            </foreach>\n        </if>\n        <!-- Screen suitable comrades based on majors, some notification persons do not have a major -->\n        <if test=\"null != majorIds and majorIds.size() > 0\">\n            AND (\n                m.id IN\n            <foreach collection=\"majorIds\" item=\"majorId\" open=\"(\" separator=\",\" close=\")\">\n                #{majorId}\n            </foreach>\n                OR m.id IS NULL\n                )\n        </if>\n    </select>\n</mapper>",
+  "details": [
+    {
+      "lineNumber": 27,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "通知等级",
+      "translatedText": "Notification level"
+    },
+    {
+      "lineNumber": 29,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "根据通知等级关联相应通知规则",
+      "translatedText": "Associate notification rules based on notification level"
+    },
+    {
+      "lineNumber": 31,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "匹配相应通知规则中的通知角色",
+      "translatedText": "Match the notification role in the corresponding notification rule"
+    },
+    {
+      "lineNumber": 33,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "根据角色初步筛选到人",
+      "translatedText": "Preliminary screening of people based on role"
+    },
+    {
+      "lineNumber": 37,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "结合dc_id的条件匹配数据中心运营主数据中的DC这一级",
+      "translatedText": "Combine the condition of dc_id to match the data center operation master data at the DC level"
+    },
+    {
+      "lineNumber": 39,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "关联所有上级节点（全国-区域-园区-数据中心）",
+      "translatedText": "Associate all parent nodes (National-Region-Park-Data Center)"
+    },
+    {
+      "lineNumber": 42,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "配置数据中心运营主数据中的DC级",
+      "translatedText": "Configure the DC level in the data center operation master data"
+    },
+    {
+      "lineNumber": 48,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "配置通知人的账户",
+      "translatedText": "Configure the notification person's account"
+    },
+    {
+      "lineNumber": 51,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "配置通知人的专业，通知人可能无对应专业",
+      "translatedText": "Configure the notification person's major, the notification person may not have a corresponding major"
+    },
+    {
+      "lineNumber": 54,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "配置通知人的A/B角，通知人可能无A/B角",
+      "translatedText": "Configure the notification person's A/B role, the notification person may not have an A/B role"
+    },
+    {
+      "lineNumber": 57,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "账户必须有效",
+      "translatedText": "The account must be valid"
+    },
+    {
+      "lineNumber": 59,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "角色必须有效",
+      "translatedText": "The role must be valid"
+    },
+    {
+      "lineNumber": 62,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "根据通知等级找到对应的通知规则",
+      "translatedText": "Find the corresponding notification rule based on the notification level"
+    },
+    {
+      "lineNumber": 66,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "根据专业筛选合适的同志人，有的通知人是没有专业的",
+      "translatedText": "Screen suitable comrades based on majors, some notification persons do not have a major"
+    }
+  ]
+}
+```
+
+### DEMOS7
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.alarmhandlercenter.mapper.AlarmSyncMapper">
+    <select id="fetchEventDetail" resultType="com.gds.jpi.dcim.core.alarmhandlercenter.response.EventDetail">
+        SELECT
+            e.id AS event_id,
+            e.event_name,
+            e.event_type_id,
+            e.temp_event_id,
+            e.temp_event_name,
+            e.location_id,
+            e.location_name,
+            e.location_full_name,
+            e.event_target_category_id,
+            e.event_target_type_id,
+            e.event_target_type_name,
+            t.event_major_id AS major_id,
+            e.dc_id,
+            dm.dc_name_inner_short AS dc_name,
+            e.event_target_inst_id,
+            e.event_target_inst_name,
+            e.seq
+        FROM
+            dcim.event_inst e
+        JOIN
+            dcim.std_temp_event t ON t.id = e.temp_event_id
+        JOIN
+            geo.dc_mapping dm ON dm.id = e.dc_id
+        WHERE
+            e.id = #{eventId}
+    </select>
+    <insert id="createAlarmDetail" keyProperty="detail.id" useGeneratedKeys="true" parameterType="com.gds.jpi.dcim.model.alarm.AlarmActDetail">
+        INSERT INTO
+            dcim.alarm_act_detail (event_id, alarm_id, event_type_id, message_type, event_level_id, break_time, event_rule_id)
+        VALUES
+            (#{detail.eventId}, #{detail.alarmId}, #{detail.eventTypeId}, #{detail.messageType}, #{detail.eventLevelId}, #{detail.breakTime}, #{detail.eventRuleId});
+    </insert>
+    <insert id="createAlarmDetailData">
+        INSERT INTO
+            dcim.alarm_act_detail_data (alarm_detail_id, sys_attr_id, value, show_value, unit, enum_value_code, collect_time, device_id, device_name, sys_attr_name)
+        VALUES
+        <foreach collection="alarmData" item="item" separator=",">
+            (#{detailId}, #{item.sysAttrId}, #{item.value}, #{item.showValue}, #{item.dataUnit}, #{item.enumCode}, #{item.collectTime}, #{item.deviceId}, #{item.deviceName}, #{item.sysAttrName})
+        </foreach>
+    </insert>
+    <update id="updateAlarmDetailData">
+        UPDATE
+            dcim.alarm_act_detail_data a
+        JOIN
+            cbms.sys_device_attr da ON da.sys_attr_id = a.sys_attr_id
+        LEFT JOIN
+            cbms.sys_device d ON d.device_id = da.device_id
+        SET
+            a.device_id = da.device_id,
+            a.device_name = d.`name`,
+            a.sys_attr_name = da.`name`
+        WHERE
+            a.alarm_detail_id = #{detailId}
+    </update>
+    <update id="updateAlarmDetailAllData">
+        UPDATE
+            dcim.alarm_act_detail_data a
+        JOIN
+            cbms.sys_device_attr da ON da.sys_attr_id = a.sys_attr_id
+        JOIN
+            dcim.std_temp_attr ta ON ta.temp_attr_id = da.temp_attr_id
+        LEFT JOIN
+            dcim.std_enum_dict ed ON ta.enum_type_code = ed.type_code AND ed.value = a.value
+        LEFT JOIN
+            cbms.sys_device d ON d.device_id = da.device_id
+        SET
+            a.show_value = IFNULL(ed.name, ROUND(a.value, ta.decimal_digit)),
+            a.unit = ta.unit,
+            a.enum_value_code = ed.code,
+            a.device_id = da.device_id,
+            a.device_name = d.`name`,
+            a.sys_attr_name = da.`name`
+        WHERE
+            a.alarm_detail_id = #{detailId}
+    </update>
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+  "translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace=\"com.gds.jpi.dcim.core.alarmhandlercenter.mapper.AlarmSyncMapper\">\n    <select id=\"fetchEventDetail\" resultType=\"com.gds.jpi.dcim.core.alarmhandlercenter.response.EventDetail\">\n        SELECT\n            e.id AS event_id,\n            e.event_name,\n            e.event_type_id,\n            e.temp_event_id,\n            e.temp_event_name,\n            e.location_id,\n            e.location_name,\n            e.location_full_name,\n            e.event_target_category_id,\n            e.event_target_type_id,\n            e.event_target_type_name,\n            t.event_major_id AS major_id,\n            e.dc_id,\n            dm.dc_name_inner_short AS dc_name,\n            e.event_target_inst_id,\n            e.event_target_inst_name,\n            e.seq\n        FROM\n            dcim.event_inst e\n        JOIN\n            dcim.std_temp_event t ON t.id = e.temp_event_id\n        JOIN\n            geo.dc_mapping dm ON dm.id = e.dc_id\n        WHERE\n            e.id = #{eventId}\n    </select>\n    <insert id=\"createAlarmDetail\" keyProperty=\"detail.id\" useGeneratedKeys=\"true\" parameterType=\"com.gds.jpi.dcim.model.alarm.AlarmActDetail\">\n        INSERT INTO\n            dcim.alarm_act_detail (event_id, alarm_id, event_type_id, message_type, event_level_id, break_time, event_rule_id)\n        VALUES\n            (#{detail.eventId}, #{detail.alarmId}, #{detail.eventTypeId}, #{detail.messageType}, #{detail.eventLevelId}, #{detail.breakTime}, #{detail.eventRuleId});\n    </insert>\n    <insert id=\"createAlarmDetailData\">\n        INSERT INTO\n            dcim.alarm_act_detail_data (alarm_detail_id, sys_attr_id, value, show_value, unit, enum_value_code, collect_time, device_id, device_name, sys_attr_name)\n        VALUES\n        <foreach collection=\"alarmData\" item=\"item\" separator=\",\">\n            (#{detailId}, #{item.sysAttrId}, #{item.value}, #{item.showValue}, #{item.dataUnit}, #{item.enumCode}, #{item.collectTime}, #{item.deviceId}, #{item.deviceName}, #{item.sysAttrName})\n        </foreach>\n    </insert>\n    <update id=\"updateAlarmDetailData\">\n        UPDATE\n            dcim.alarm_act_detail_data a\n        JOIN\n            cbms.sys_device_attr da ON da.sys_attr_id = a.sys_attr_id\n        LEFT JOIN\n            cbms.sys_device d ON d.device_id = da.device_id\n        SET\n            a.device_id = da.device_id,\n            a.device_name = d.`name`,\n            a.sys_attr_name = da.`name`\n        WHERE\n            a.alarm_detail_id = #{detailId}\n    </update>\n    <update id=\"updateAlarmDetailAllData\">\n        UPDATE\n            dcim.alarm_act_detail_data a\n        JOIN\n            cbms.sys_device_attr da ON da.sys_attr_id = a.sys_attr_id\n        JOIN\n            dcim.std_temp_attr ta ON ta.temp_attr_id = da.temp_attr_id\n        LEFT JOIN\n            dcim.std_enum_dict ed ON ta.enum_type_code = ed.type_code AND ed.value = a.value\n        LEFT JOIN\n            cbms.sys_device d ON d.device_id = da.device_id\n        SET\n            a.show_value = IFNULL(ed.name, ROUND(a.value, ta.decimal_digit)),\n            a.unit = ta.unit,\n            a.enum_value_code = ed.code,\n            a.device_id = da.device_id,\n            a.device_name = d.`name`,\n            a.sys_attr_name = da.`name`\n        WHERE\n            a.alarm_detail_id = #{detailId}\n    </update>\n</mapper>",
+  "details": []
+}
+```
+
+
+### DEMOS8
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.CfgBmsDeviceMapper">
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
+        insert into `cbms`.`cfg_bms_device`(agent_id, device_no, device_name, parent_no, update_time, find_time, is_del) values
+            <foreach collection="cfgBmsDevices" item="bmsDevice" index="index" separator=",">
+                (#{bmsDevice.agentId}, #{bmsDevice.deviceNo}, #{bmsDevice.deviceName}, #{bmsDevice.parentNo}, #{bmsDevice.updateTime}, #{bmsDevice.findTime}, #{bmsDevice.isDel})
+            </foreach>
+    </insert>
+
+    <insert id="batchInsertV7" useGeneratedKeys="true" keyProperty="id">
+        insert into `cbms`.`cfg_bms_device`(agent_id, device_no, device_name, station_no, update_time,station_name, find_time, is_del) values
+        <foreach collection="cfgBmsDevices" item="bmsDevice" index="index" separator=",">
+            (#{bmsDevice.agentId}, #{bmsDevice.deviceNo}, #{bmsDevice.deviceName}, #{bmsDevice.stationNo}, #{bmsDevice.updateTime},#{bmsDevice.stationName}, #{bmsDevice.findTime}, #{bmsDevice.isDel})
+        </foreach>
+    </insert>
+
+    <update id="batchModifyUpdateTime">
+        update `cbms`.`cfg_bms_device` set update_time=now(), is_del =0
+        where id in
+        <foreach item="item" index="index" collection="cfgBmsDevices" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <update id="batchUpdate">
+        update `cbms`.`cfg_bms_device`
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="agent_id = case" suffix="end,">
+                <foreach collection="cfgBmsDevices" item="item">
+                    <if test="item.agentId!=null">
+                        when id=#{item.id} then #{item.agentId}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="device_no = case" suffix="end,">
+                <foreach collection="cfgBmsDevices" item="item">
+                    <if test="item.deviceNo!=null">
+                        when id=#{item.id} then #{item.deviceNo}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="device_name = case" suffix="end,">
+                <foreach collection="cfgBmsDevices" item="item">
+                    <if test="item.deviceName!=null">
+                        when id=#{item.id} then #{item.deviceName}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="station_name = case" suffix="end,">
+                <foreach collection="cfgBmsDevices" item="item">
+                    <if test="item.stationName!=null">
+                        when id=#{item.id} then #{item.stationName}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="station_no = case" suffix="end,">
+                <foreach collection="cfgBmsDevices" item="item">
+                    <if test="item.stationNo!=null">
+                        when id=#{item.id} then #{item.stationNo}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="parent_no = case" suffix="end,">
+                <foreach collection="cfgBmsDevices" item="item">
+                    <if test="item.parentNo!=null">
+                        when id=#{item.id} then #{item.parentNo}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_time = case" suffix="end,">
+                <foreach collection="cfgBmsDevices" item="item">
+                    when id=#{item.id} then now()
+                </foreach>
+            </trim>
+            <trim prefix="find_time = case" suffix="end,">
+                <foreach collection="cfgBmsDevices" item="item">
+                    when id=#{item.id} then now()
+                </foreach>
+            </trim>
+            <trim prefix="is_del = case" suffix="end,">
+                <foreach collection="cfgBmsDevices" item="item">
+                    when id=#{item.id} then 0
+                </foreach>
+            </trim>
+        </trim>
+        where id in
+        <foreach item="item" index="index" collection="cfgBmsDevices" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
+    <select id="fetchVersion" resultType="java.lang.String">
+        SELECT
+            MD5(GROUP_CONCAT(IFNULL(UPDATE_TIME, ''))) hash_code
+        FROM
+            information_schema.tables
+        WHERE
+            (TABLE_SCHEMA = 'cbms' AND TABLE_NAME = 'sys_device_attr')
+    </select>
+    <select id="findByAgentIdAndDeviceNos" resultType="com.gds.jpi.dcim.model.cfg.CfgBmsDevice">
+        select a.*
+        from cbms.cfg_bms_device a
+        where a.agent_id = #{agentId} and  a.device_no in
+        <foreach item="item" index="index" collection="deviceNos" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+            and a.is_del = 0;
+    </select>
+
+    <update id="deleteByAgentId">
+        update cbms.cfg_bms_device
+        set is_del = 1
+        where agent_id = #{agentId} and (update_time is null or update_time <![CDATA[ < ]]> date_add(now(), interval -7 day))
+    </update>
+
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+  "translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace=\"com.gds.jpi.dcim.core.mapper.CfgBmsDeviceMapper\">\n    <insert id=\"batchInsert\" useGeneratedKeys=\"true\" keyProperty=\"id\">\n        insert into `cbms`.`cfg_bms_device`(agent_id, device_no, device_name, parent_no, update_time, find_time, is_del) values\n            <foreach collection=\"cfgBmsDevices\" item=\"bmsDevice\" index=\"index\" separator=\",\">\n                (#{bmsDevice.agentId}, #{bmsDevice.deviceNo}, #{bmsDevice.deviceName}, #{bmsDevice.parentNo}, #{bmsDevice.updateTime}, #{bmsDevice.findTime}, #{bmsDevice.isDel})\n            </foreach>\n    </insert>\n\n    <insert id=\"batchInsertV7\" useGeneratedKeys=\"true\" keyProperty=\"id\">\n        insert into `cbms`.`cfg_bms_device`(agent_id, device_no, device_name, station_no, update_time,station_name, find_time, is_del) values\n        <foreach collection=\"cfgBmsDevices\" item=\"bmsDevice\" index=\"index\" separator=\",\">\n            (#{bmsDevice.agentId}, #{bmsDevice.deviceNo}, #{bmsDevice.deviceName}, #{bmsDevice.stationNo}, #{bmsDevice.updateTime},#{bmsDevice.stationName}, #{bmsDevice.findTime}, #{bmsDevice.isDel})\n        </foreach>\n    </insert>\n\n    <update id=\"batchModifyUpdateTime\">\n        update `cbms`.`cfg_bms_device` set update_time=now(), is_del =0\n        where id in\n        <foreach item=\"item\" index=\"index\" collection=\"cfgBmsDevices\" open=\"(\" separator=\",\" close=\")\">\n            #{item.id}\n        </foreach>\n    </update>\n\n    <update id=\"batchUpdate\">\n        update `cbms`.`cfg_bms_device`\n        <trim prefix=\"set\" suffixOverrides=\",\">\n            <trim prefix=\"agent_id = case\" suffix=\"end,\">\n                <foreach collection=\"cfgBmsDevices\" item=\"item\">\n                    <if test=\"item.agentId!=null\">\n                        when id=#{item.id} then #{item.agentId}\n                    </if>\n                </foreach>\n            </trim>\n            <trim prefix=\"device_no = case\" suffix=\"end,\">\n                <foreach collection=\"cfgBmsDevices\" item=\"item\">\n                    <if test=\"item.deviceNo!=null\">\n                        when id=#{item.id} then #{item.deviceNo}\n                    </if>\n                </foreach>\n            </trim>\n            <trim prefix=\"device_name = case\" suffix=\"end,\">\n                <foreach collection=\"cfgBmsDevices\" item=\"item\">\n                    <if test=\"item.deviceName!=null\">\n                        when id=#{item.id} then #{item.deviceName}\n                    </if>\n                </foreach>\n            </trim>\n            <trim prefix=\"station_name = case\" suffix=\"end,\">\n                <foreach collection=\"cfgBmsDevices\" item=\"item\">\n                    <if test=\"item.stationName!=null\">\n                        when id=#{item.id} then #{item.stationName}\n                    </if>\n                </foreach>\n            </trim>\n            <trim prefix=\"station_no = case\" suffix=\"end,\">\n                <foreach collection=\"cfgBmsDevices\" item=\"item\">\n                    <if test=\"item.stationNo!=null\">\n                        when id=#{item.id} then #{item.stationNo}\n                    </if>\n                </foreach>\n            </trim>\n            <trim prefix=\"parent_no = case\" suffix=\"end,\">\n                <foreach collection=\"cfgBmsDevices\" item=\"item\">\n                    <if test=\"item.parentNo!=null\">\n                        when id=#{item.id} then #{item.parentNo}\n                    </if>\n                </foreach>\n            </trim>\n            <trim prefix=\"update_time = case\" suffix=\"end,\">\n                <foreach collection=\"cfgBmsDevices\" item=\"item\">\n                    when id=#{item.id} then now()\n                </foreach>\n            </trim>\n            <trim prefix=\"find_time = case\" suffix=\"end,\">\n                <foreach collection=\"cfgBmsDevices\" item=\"item\">\n                    when id=#{item.id} then now()\n                </foreach>\n            </trim>\n            <trim prefix=\"is_del = case\" suffix=\"end,\">\n                <foreach collection=\"cfgBmsDevices\" item=\"item\">\n                    when id=#{item.id} then 0\n                </foreach>\n            </trim>\n        </trim>\n        where id in\n        <foreach item=\"item\" index=\"index\" collection=\"cfgBmsDevices\" open=\"(\" separator=\",\" close=\")\">\n            #{item.id}\n        </foreach>\n    </update>\n    <select id=\"fetchVersion\" resultType=\"java.lang.String\">\n        SELECT\n            MD5(GROUP_CONCAT(IFNULL(UPDATE_TIME, ''))) hash_code\n        FROM\n            information_schema.tables\n        WHERE\n            (TABLE_SCHEMA = 'cbms' AND TABLE_NAME = 'sys_device_attr')\n    </select>\n    <select id=\"findByAgentIdAndDeviceNos\" resultType=\"com.gds.jpi.dcim.model.cfg.CfgBmsDevice\">\n        select a.*\n        from cbms.cfg_bms_device a\n        where a.agent_id = #{agentId} and  a.device_no in\n        <foreach item=\"item\" index=\"index\" collection=\"deviceNos\" open=\"(\" separator=\",\" close=\")\">\n            #{item}\n        </foreach>\n            and a.is_del = 0;\n    </select>\n\n    <update id=\"deleteByAgentId\">\n        update cbms.cfg_bms_device\n        set is_del = 1\n        where agent_id = #{agentId} and (update_time is null or update_time <![CDATA[ < ]]> date_add(now(), interval -7 day))\n    </update>\n\n</mapper>",
+  "details": []
+}
+```
+
+
+### DEMOS9
+
+#### Input:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gds.jpi.dcim.core.mapper.CustomerImpactMapper">
+
+    <!-- 查询数据中心影响客户 -->
+    <select id="findImpactCustomersByDc" resultType="com.gds.jpi.dcim.vo.CustomerImpactVO">
+        SELECT DISTINCT
+            cm.customer_id,
+            cm.`name` AS customer_name,
+            cm.alias AS customer_alias,
+            IF(cm.customer_id = cp.end_customer_id, '甲方&amp;最终用户', '甲方') AS type
+        FROM cip.cip_project cp
+        JOIN dcrm.rel_project_dc rpd ON cp.project_code = rpd.project_code
+        JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id
+        JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id
+        WHERE
+            cp.status = 0
+          AND rpd.is_released = 0
+          AND cm.customer_id IS NOT NULL
+          <if test="dcIds != null and dcIds.size() > 0">
+            AND rpd.dc_id IN
+            <foreach collection="dcIds" item="dcId" open="(" close=")" separator=",">
+                #{dcId}
+            </foreach>
+          </if>
+        UNION ALL
+        SELECT DISTINCT
+            ecm.customer_id,
+            ecm.`name` AS customer_name,
+            ecm.alias AS customer_alias,
+            '最终用户' AS type
+        FROM cip.cip_project cp
+        JOIN dcrm.rel_project_dc rpd ON cp.project_code = rpd.project_code
+        JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id
+        JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id
+        JOIN cip.cip_customer ecm ON ecm.customer_id = cp.end_customer_id
+        WHERE
+            cp.status = 0
+          AND rpd.is_released = 0
+          AND cm.customer_id IS NOT NULL
+          <if test="dcIds != null and dcIds.size() > 0">
+            AND rpd.dc_id IN
+            <foreach collection="dcIds" item="dcId" open="(" close=")" separator=",">
+                #{dcId}
+            </foreach>
+          </if>
+          AND cp.end_customer_id IS NOT NULL
+          AND cm.customer_id != cp.end_customer_id
+        ORDER BY
+            type,
+            customer_name
+    </select>
+
+    <!-- 查询位置影响客户 -->
+    <select id="findImpactCustomersByLocation" resultType="com.gds.jpi.dcim.vo.CustomerImpactVO">
+        SELECT DISTINCT
+            cm.customer_id,
+            cm.`name` AS customer_name,
+            cm.alias AS customer_alias,
+            IF(cm.customer_id = cp.end_customer_id, '甲方&amp;最终用户', '甲方') AS type
+        FROM cip.cip_project cp
+        JOIN dcrm.rel_project_room rpd ON cp.project_code = rpd.project_code
+        JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id
+        JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id
+        WHERE
+            cp.status = 0
+          AND rpd.is_released = 0
+          AND cm.customer_id IS NOT NULL
+          <if test="locationIds != null and locationIds.size() > 0">
+            AND rpd.room_location_id IN
+            <foreach collection="locationIds" item="locationId" open="(" close=")" separator=",">
+                #{locationId}
+            </foreach>
+          </if>
+        UNION ALL
+        SELECT DISTINCT
+            ecm.customer_id,
+            ecm.`name` AS customer_name,
+            ecm.alias AS customer_alias,
+            '最终用户' AS type
+        FROM cip.cip_project cp
+        JOIN dcrm.rel_project_room rpd ON cp.project_code = rpd.project_code
+        JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id
+        JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id
+        JOIN cip.cip_customer ecm ON ecm.customer_id = cp.end_customer_id
+        WHERE
+            cp.status = 0
+          AND rpd.is_released = 0
+          AND cm.customer_id IS NOT NULL
+          <if test="locationIds != null and locationIds.size() > 0">
+            AND rpd.room_location_id IN
+            <foreach collection="locationIds" item="locationId" open="(" close=")" separator=",">
+                #{locationId}
+            </foreach>
+          </if>
+          AND cp.end_customer_id IS NOT NULL
+          AND cm.customer_id != cp.end_customer_id
+        ORDER BY
+            type,
+            customer_name
+    </select>
+
+    <!-- 查询机柜影响 -->
+    <select id="findImpactCustomersByCabinet" resultType="com.gds.jpi.dcim.vo.CustomerImpactVO">
+       SELECT DISTINCT
+           cm.customer_id,
+           cm.`name` AS customer_name,
+           cm.alias AS customer_alias,
+           IF(cm.customer_id = cp.end_customer_id, '甲方&amp;最终用户', '甲方') AS type
+       FROM cip.cip_project cp
+       JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id
+       JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id
+       JOIN cbms.sys_cabinet sc ON cp.project_code = sc.project_code
+       JOIN dcrm.rel_project_dc rpd ON cp.project_code = rpd.project_code
+       WHERE
+           cp.status = 0
+         AND rpd.is_released = 0
+         AND sc.status = 1
+         AND sc.elec_status = 1
+        <if test="cabinetIds != null and cabinetIds.size() > 0">
+         AND sc.cabinet_id IN
+            <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">
+                #{cabinetId}
+            </foreach>
+       </if>
+       UNION ALL
+       SELECT DISTINCT
+           ecm.customer_id,
+           ecm.`name` AS customer_name,
+           ecm.alias AS customer_alias,
+           '最终用户' AS type
+       FROM cip.cip_project cp
+       JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id
+       JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id
+       JOIN cbms.sys_cabinet sc ON cp.project_code = sc.project_code
+       JOIN dcrm.rel_project_dc rpd ON cp.project_code = rpd.project_code
+       JOIN cip.cip_customer ecm ON ecm.customer_id = cp.end_customer_id
+       WHERE
+           cp.status = 0
+         AND rpd.is_released = 0
+         AND sc.status = 1
+         AND sc.elec_status = 1
+         <if test="cabinetIds != null and cabinetIds.size() > 0">
+           AND sc.cabinet_id IN
+            <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">
+                #{cabinetId}
+            </foreach>
+         </if>
+         AND cp.end_customer_id IS NOT NULL
+         AND cm.customer_id != cp.end_customer_id
+    </select>
+
+    <!-- 查询影响客户的ADM联系人（通过项目维度进行影响分析） -->
+    <!--<select id="findCustomerImpactADMs" resultType="com.gds.jpi.dcim.vo.CustomerImpactAdmVO"
+            parameterType="com.gds.jpi.dcim.dto.CustomerImpactContactDTO">
+        SELECT DISTINCT
+            cm.customer_id AS customer_id,
+            cm.`name` AS customer_name,
+            cp.end_customer_id,
+            ecm.`name` AS end_customer_name,
+            cc.contract_id AS contract_id,
+            cp.project_code AS project_code,
+            cp.pm_account AS adm_account,
+            acc.`name` AS adm_name
+        FROM cip.cip_customer cm
+        LEFT JOIN cip.cip_contract cc ON cc.customer_id = cm.customer_id
+        LEFT JOIN cip.cip_project cp ON cp.contract_id = cc.contract_id
+        LEFT JOIN cip.cip_customer ecm ON cp.end_customer_id = ecm.customer_id
+        LEFT JOIN sms.account acc ON cp.pm_account = acc.account
+        WHERE cp.status = 0
+          AND cp.pm_account IS NOT NULL
+    <if test="(customerIds != null and customerIds.size() > 0) or (endCustomerIds != null and endCustomerIds.size() > 0)">
+       AND (
+        <trim prefixOverrides="OR">
+        <if test="customerIds != null and customerIds.size() > 0">
+          OR cc.customer_id IN
+                  <foreach collection="customerIds" item="customerId" open="(" close=")" separator=",">
+                    #{customerId}
+                  </foreach>
+        </if>
+        <if test="endCustomerIds != null and endCustomerIds.size() > 0">
+          OR cp.end_customer_id IN
+                  <foreach collection="endCustomerIds" item="customerId" open="(" close=")" separator=",">
+                    #{customerId}
+                  </foreach>
+        </if>
+        </trim>
+        )
+    </if>
+        <if test="dcIds != null and dcIds.size() > 0">
+          AND EXISTS (
+                SELECT 1
+                FROM dcrm.rel_project_dc pd
+                WHERE pd.project_code = cp.project_code
+                  AND pd.is_released = 0
+                  AND pd.dc_id IN
+                  <foreach collection="dcIds" item="dcId" open="(" close=")" separator=",">
+                    #{dcId}
+                  </foreach>
+            )
+        </if>
+        <if test="(locationIds != null and locationIds.size() > 0) || (roomIds != null and roomIds.size() > 0) ">
+          AND EXISTS (
+                SELECT 1
+                FROM dcrm.rel_project_room pr
+                LEFT JOIN dcrm.room r ON pr.room_location_id = r.location_id
+                WHERE pr.project_code = cp.project_code
+                  AND pr.is_released = 0
+                  AND pr.room_location_id IN
+                  <foreach collection="locationIds" item="locationId" open="(" close=")" separator=",">
+                    #{locationId}
+                  </foreach>
+                  AND r.id IN
+                  <foreach collection="roomIds" item="roomId" open="(" close=")" separator=",">
+                    #{roomId}
+                  </foreach>
+            )
+        </if>
+        <if test="cabinetIds != null and cabinetIds.size() > 0">
+          AND EXISTS (
+                SELECT 1
+                FROM cbms.sys_cabinet sc
+                WHERE sc.project_code = cp.project_code
+                  AND sc.elec_status = 1
+                  AND sc.`status` = 1
+                  AND sc.cabinet_id IN
+                  <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">
+                    #{cabinetId}
+                  </foreach>
+            )
+        </if>
+    </select>-->
+
+    <select id="findCustomerImpactADMsByCabinet" resultType="com.gds.jpi.dcim.vo.CustomerImpactAdmVO"
+            parameterType="com.gds.jpi.dcim.dto.CustomerImpactContactDTO">
+        SELECT DISTINCT
+        cm.customer_id AS customer_id,
+        cm.`name` AS customer_name,
+        cp.end_customer_id,
+        ecm.`name` AS end_customer_name,
+        cc.contract_id AS contract_id,
+        cp.project_code AS project_code,
+        cp.pm_account AS adm_account,
+        acc.`name` AS adm_name
+        FROM cip.cip_customer cm
+        LEFT JOIN cip.cip_contract cc ON cc.customer_id = cm.customer_id
+        LEFT JOIN cip.cip_project cp ON cp.contract_id = cc.contract_id
+        LEFT JOIN cip.cip_customer ecm ON cp.end_customer_id = ecm.customer_id
+        LEFT JOIN sms.account acc ON cp.pm_account = acc.account
+        WHERE cp.status = 0
+        AND cp.pm_account IS NOT NULL
+        <if test="(customerIds != null and customerIds.size() > 0) or (endCustomerIds != null and endCustomerIds.size() > 0)">
+            AND (
+            <trim prefixOverrides="OR">
+                <if test="customerIds != null and customerIds.size() > 0">
+                    OR cc.customer_id IN
+                    <foreach collection="customerIds" item="customerId" open="(" close=")" separator=",">
+                        #{customerId}
+                    </foreach>
+                </if>
+                <if test="endCustomerIds != null and endCustomerIds.size() > 0">
+                    OR cp.end_customer_id IN
+                    <foreach collection="endCustomerIds" item="customerId" open="(" close=")" separator=",">
+                        #{customerId}
+                    </foreach>
+                </if>
+            </trim>
+            )
+        </if>
+            AND EXISTS (
+            SELECT 1
+            FROM cbms.sys_cabinet sc
+            WHERE sc.project_code = cp.project_code
+            AND sc.elec_status = 1
+            AND sc.`status` = 1
+           <if test="cabinetIds != null and cabinetIds.size() > 0">
+             AND sc.cabinet_id IN
+             <foreach collection="cabinetIds" item="cabinetId" open="(" close=")" separator=",">
+                #{cabinetId}
+             </foreach>
+           </if>
+            )
+    </select>
+
+    <select id="findCustomerImpactADMsByRoomOrLocation" resultType="com.gds.jpi.dcim.vo.CustomerImpactAdmVO"
+            parameterType="com.gds.jpi.dcim.dto.CustomerImpactContactDTO">
+        SELECT DISTINCT
+        cm.customer_id AS customer_id,
+        cm.`name` AS customer_name,
+        cp.end_customer_id,
+        ecm.`name` AS end_customer_name,
+        cc.contract_id AS contract_id,
+        cp.project_code AS project_code,
+        cp.pm_account AS adm_account,
+        acc.`name` AS adm_name
+        FROM cip.cip_customer cm
+        LEFT JOIN cip.cip_contract cc ON cc.customer_id = cm.customer_id
+        LEFT JOIN cip.cip_project cp ON cp.contract_id = cc.contract_id
+        LEFT JOIN cip.cip_customer ecm ON cp.end_customer_id = ecm.customer_id
+        LEFT JOIN sms.account acc ON cp.pm_account = acc.account
+        WHERE cp.status = 0
+        AND cp.pm_account IS NOT NULL
+        <if test="(customerIds != null and customerIds.size() > 0) or (endCustomerIds != null and endCustomerIds.size() > 0)">
+            AND (
+            <trim prefixOverrides="OR">
+                <if test="customerIds != null and customerIds.size() > 0">
+                    OR cc.customer_id IN
+                    <foreach collection="customerIds" item="customerId" open="(" close=")" separator=",">
+                        #{customerId}
+                    </foreach>
+                </if>
+                <if test="endCustomerIds != null and endCustomerIds.size() > 0">
+                    OR cp.end_customer_id IN
+                    <foreach collection="endCustomerIds" item="customerId" open="(" close=")" separator=",">
+                        #{customerId}
+                    </foreach>
+                </if>
+            </trim>
+            )
+        </if>
+            AND EXISTS (
+            SELECT 1
+            FROM dcrm.rel_project_room pr
+            LEFT JOIN geo.room r ON pr.room_location_id = r.location_id
+            WHERE pr.project_code = cp.project_code
+            AND pr.is_released = 0
+           <!-- <if test = "locationIds != null and locationIds.size()>0">
+                  AND pr.room_location_id IN
+                  <foreach collection="locationIds" item="locationId" open="(" close=")" separator=",">
+                      #{locationId}
+                  </foreach>
+            </if>-->
+            <if test="roomIds != null and roomIds.size() > 0">
+                AND r.id IN
+                <foreach collection="roomIds" item="roomId" open="(" close=")" separator=",">
+                    #{roomId}
+                </foreach>
+            </if>
+            )
+    </select>
+
+    <select id="findCustomerImpactADMsByDc" resultType="com.gds.jpi.dcim.vo.CustomerImpactAdmVO"
+            parameterType="com.gds.jpi.dcim.dto.CustomerImpactContactDTO">
+        SELECT DISTINCT
+        cm.customer_id AS customer_id,
+        cm.`name` AS customer_name,
+        cp.end_customer_id,
+        ecm.`name` AS end_customer_name,
+        cc.contract_id AS contract_id,
+        cp.project_code AS project_code,
+        cp.pm_account AS adm_account,
+        acc.`name` AS adm_name
+        FROM cip.cip_customer cm
+        LEFT JOIN cip.cip_contract cc ON cc.customer_id = cm.customer_id
+        LEFT JOIN cip.cip_project cp ON cp.contract_id = cc.contract_id
+        LEFT JOIN cip.cip_customer ecm ON cp.end_customer_id = ecm.customer_id
+        LEFT JOIN sms.account acc ON cp.pm_account = acc.account
+        WHERE cp.status = 0
+        AND cp.pm_account IS NOT NULL
+        <if test="(customerIds != null and customerIds.size() > 0) or (endCustomerIds != null and endCustomerIds.size() > 0)">
+            AND (
+            <trim prefixOverrides="OR">
+                <if test="customerIds != null and customerIds.size() > 0">
+                    OR cc.customer_id IN
+                    <foreach collection="customerIds" item="customerId" open="(" close=")" separator=",">
+                        #{customerId}
+                    </foreach>
+                </if>
+                <if test="endCustomerIds != null and endCustomerIds.size() > 0">
+                    OR cp.end_customer_id IN
+                    <foreach collection="endCustomerIds" item="customerId" open="(" close=")" separator=",">
+                        #{customerId}
+                    </foreach>
+                </if>
+            </trim>
+            )
+        </if>
+            AND EXISTS (
+            SELECT 1
+            FROM dcrm.rel_project_dc pd
+            WHERE pd.project_code = cp.project_code
+            AND pd.is_released = 0
+            <if test="dcIds != null and dcIds.size() > 0">
+             AND pd.dc_id IN
+              <foreach collection="dcIds" item="dcId" open="(" close=")" separator=",">
+                #{dcId}
+              </foreach>
+            </if>
+            )
+    </select>
+</mapper>
+```
+
+#### Output:
+
+```json
+{
+  "translatedCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace=\"com.gds.jpi.dcim.core.mapper.CustomerImpactMapper\">\n\n    <!-- Query data center impact customers -->\n    <select id=\"findImpactCustomersByDc\" resultType=\"com.gds.jpi.dcim.vo.CustomerImpactVO\">\n        SELECT DISTINCT\n            cm.customer_id,\n            cm.`name` AS customer_name,\n            cm.alias AS customer_alias,\n            IF(cm.customer_id = cp.end_customer_id, 'Party A &amp; Final User', 'Party A') AS type\n        FROM cip.cip_project cp\n        JOIN dcrm.rel_project_dc rpd ON cp.project_code = rpd.project_code\n        JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id\n        JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id\n        WHERE\n            cp.status = 0\n          AND rpd.is_released = 0\n          AND cm.customer_id IS NOT NULL\n          <if test=\"dcIds != null and dcIds.size() > 0\">\n            AND rpd.dc_id IN\n            <foreach collection=\"dcIds\" item=\"dcId\" open=\"(\" close=\")\" separator=\",\">\n                #{dcId}\n            </foreach>\n          </if>\n        UNION ALL\n        SELECT DISTINCT\n            ecm.customer_id,\n            ecm.`name` AS customer_name,\n            ecm.alias AS customer_alias,\n            'Final User' AS type\n        FROM cip.cip_project cp\n        JOIN dcrm.rel_project_dc rpd ON cp.project_code = rpd.project_code\n        JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id\n        JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id\n        JOIN cip.cip_customer ecm ON ecm.customer_id = cp.end_customer_id\n        WHERE\n            cp.status = 0\n          AND rpd.is_released = 0\n          AND cm.customer_id IS NOT NULL\n          <if test=\"dcIds != null and dcIds.size() > 0\">\n            AND rpd.dc_id IN\n            <foreach collection=\"dcIds\" item=\"dcId\" open=\"(\" close=\")\" separator=\",\">\n                #{dcId}\n            </foreach>\n          </if>\n          AND cp.end_customer_id IS NOT NULL\n          AND cm.customer_id != cp.end_customer_id\n        ORDER BY\n            type,\n            customer_name\n    </select>\n\n    <!-- Query location impact customers -->\n    <select id=\"findImpactCustomersByLocation\" resultType=\"com.gds.jpi.dcim.vo.CustomerImpactVO\">\n        SELECT DISTINCT\n            cm.customer_id,\n            cm.`name` AS customer_name,\n            cm.alias AS customer_alias,\n            IF(cm.customer_id = cp.end_customer_id, 'Party A &amp; Final User', 'Party A') AS type\n        FROM cip.cip_project cp\n        JOIN dcrm.rel_project_room rpd ON cp.project_code = rpd.project_code\n        JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id\n        JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id\n        WHERE\n            cp.status = 0\n          AND rpd.is_released = 0\n          AND cm.customer_id IS NOT NULL\n          <if test=\"locationIds != null and locationIds.size() > 0\">\n            AND rpd.room_location_id IN\n            <foreach collection=\"locationIds\" item=\"locationId\" open=\"(\" close=\")\" separator=\",\">\n                #{locationId}\n            </foreach>\n          </if>\n        UNION ALL\n        SELECT DISTINCT\n            ecm.customer_id,\n            ecm.`name` AS customer_name,\n            ecm.alias AS customer_alias,\n            'Final User' AS type\n        FROM cip.cip_project cp\n        JOIN dcrm.rel_project_room rpd ON cp.project_code = rpd.project_code\n        JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id\n        JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id\n        JOIN cip.cip_customer ecm ON ecm.customer_id = cp.end_customer_id\n        WHERE\n            cp.status = 0\n          AND rpd.is_released = 0\n          AND cm.customer_id IS NOT NULL\n          <if test=\"locationIds != null and locationIds.size() > 0\">\n            AND rpd.room_location_id IN\n            <foreach collection=\"locationIds\" item=\"locationId\" open=\"(\" close=\")\" separator=\",\">\n                #{locationId}\n            </foreach>\n          </if>\n          AND cp.end_customer_id IS NOT NULL\n          AND cm.customer_id != cp.end_customer_id\n        ORDER BY\n            type,\n            customer_name\n    </select>\n\n    <!-- Query cabinet impact -->\n    <select id=\"findImpactCustomersByCabinet\" resultType=\"com.gds.jpi.dcim.vo.CustomerImpactVO\">\n       SELECT DISTINCT\n           cm.customer_id,\n           cm.`name` AS customer_name,\n           cm.alias AS customer_alias,\n           IF(cm.customer_id = cp.end_customer_id, 'Party A &amp; Final User', 'Party A') AS type\n       FROM cip.cip_project cp\n       JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id\n       JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id\n       JOIN cbms.sys_cabinet sc ON cp.project_code = sc.project_code\n       JOIN dcrm.rel_project_dc rpd ON cp.project_code = rpd.project_code\n       WHERE\n           cp.status = 0\n         AND rpd.is_released = 0\n         AND sc.status = 1\n         AND sc.elec_status = 1\n        <if test=\"cabinetIds != null and cabinetIds.size() > 0\">\n         AND sc.cabinet_id IN\n            <foreach collection=\"cabinetIds\" item=\"cabinetId\" open=\"(\" close=\")\" separator=\",\">\n                #{cabinetId}\n            </foreach>\n       </if>\n       UNION ALL\n       SELECT DISTINCT\n           ecm.customer_id,\n           ecm.`name` AS customer_name,\n           ecm.alias AS customer_alias,\n           'Final User' AS type\n       FROM cip.cip_project cp\n       JOIN cip.cip_contract cc ON cp.contract_id = cc.contract_id\n       JOIN cip.cip_customer cm ON cc.customer_id = cm.customer_id\n       JOIN cbms.sys_cabinet sc ON cp.project_code = sc.project_code\n       JOIN dcrm.rel_project_dc rpd ON cp.project_code = rpd.project_code\n       JOIN cip.cip_customer ecm ON ecm.customer_id = cp.end_customer_id\n       WHERE\n           cp.status = 0\n         AND rpd.is_released = 0\n         AND sc.status = 1\n         AND sc.elec_status = 1\n         <if test=\"cabinetIds != null and cabinetIds.size() > 0\">\n           AND sc.cabinet_id IN\n            <foreach collection=\"cabinetIds\" item=\"cabinetId\" open=\"(\" close=\")\" separator=\",\">\n                #{cabinetId}\n            </foreach>\n         </if>\n         AND cp.end_customer_id IS NOT NULL\n         AND cm.customer_id != cp.end_customer_id\n    </select>\n\n    <!-- Query impact customer's ADM contacts (impact analysis through project dimension) -->\n    <!--<select id=\"findCustomerImpactADMs\" resultType=\"com.gds.jpi.dcim.vo.CustomerImpactAdmVO\"\n            parameterType=\"com.gds.jpi.dcim.dto.CustomerImpactContactDTO\">\n        SELECT DISTINCT\n            cm.customer_id AS customer_id,\n            cm.`name` AS customer_name,\n            cp.end_customer_id,\n            ecm.`name` AS end_customer_name,\n            cc.contract_id AS contract_id,\n            cp.project_code AS project_code,\n            cp.pm_account AS adm_account,\n            acc.`name` AS adm_name\n        FROM cip.cip_customer cm\n        LEFT JOIN cip.cip_contract cc ON cc.customer_id = cm.customer_id\n        LEFT JOIN cip.cip_project cp ON cp.contract_id = cc.contract_id\n        LEFT JOIN cip.cip_customer ecm ON cp.end_customer_id = ecm.customer_id\n        LEFT JOIN sms.account acc ON cp.pm_account = acc.account\n        WHERE cp.status = 0\n          AND cp.pm_account IS NOT NULL\n    <if test=\"(customerIds != null and customerIds.size() > 0) or (endCustomerIds != null and endCustomerIds.size() > 0)\">\n       AND (\n        <trim prefixOverrides=\"OR\">\n        <if test=\"customerIds != null and customerIds.size() > 0\">\n          OR cc.customer_id IN\n                  <foreach collection=\"customerIds\" item=\"customerId\" open=\"(\" close=\")\" separator=\",\">\n                    #{customerId}\n                  </foreach>\n        </if>\n        <if test=\"endCustomerIds != null and endCustomerIds.size() > 0\">\n          OR cp.end_customer_id IN\n                  <foreach collection=\"endCustomerIds\" item=\"customerId\" open=\"(\" close=\")\" separator=\",\">\n                    #{customerId}\n                  </foreach>\n        </if>\n        </trim>\n        \n    </if>\n        <if test=\"dcIds != null and dcIds.size() > 0\">\n          AND EXISTS (\n                SELECT 1\n                FROM dcrm.rel_project_dc pd\n                WHERE pd.project_code = cp.project_code\n                  AND pd.is_released = 0\n                  AND pd.dc_id IN\n                  <foreach collection=\"dcIds\" item=\"dcId\" open=\"(\" close=\")\" separator=\",\">\n                    #{dcId}\n                  </foreach>\n            \n        </if>\n        <if test=\"(locationIds != null and locationIds.size() > 0) || (roomIds != null and roomIds.size() > 0) \">\n          AND EXISTS (\n                SELECT 1\n                FROM dcrm.rel_project_room pr\n                LEFT JOIN dcrm.room r ON pr.room_location_id = r.location_id\n                WHERE pr.project_code = cp.project_code\n                  AND pr.is_released = 0\n                  AND pr.room_location_id IN\n                  <foreach collection=\"locationIds\" item=\"locationId\" open=\"(\" close=\")\" separator=\",\">\n                    #{locationId}\n                  </foreach>\n                  AND r.id IN\n                  <foreach collection=\"roomIds\" item=\"roomId\" open=\"(\" close=\")\" separator=\",\">\n                    #{roomId}\n                  </foreach>\n            \n        </if>\n        <if test=\"cabinetIds != null and cabinetIds.size() > 0\">\n          AND EXISTS (\n                SELECT 1\n                FROM cbms.sys_cabinet sc\n                WHERE sc.project_code = cp.project_code\n                  AND sc.elec_status = 1\n                  AND sc.`status` = 1\n                  AND sc.cabinet_id IN\n                  <foreach collection=\"cabinetIds\" item=\"cabinetId\" open=\"(\" close=\")\" separator=\",\">\n                    #{cabinetId}\n                  </foreach>\n            \n        </if>\n    </select>-->\n\n    <select id=\"findCustomerImpactADMsByCabinet\" resultType=\"com.gds.jpi.dcim.vo.CustomerImpactAdmVO\"\n            parameterType=\"com.gds.jpi.dcim.dto.CustomerImpactContactDTO\">\n        SELECT DISTINCT\n        cm.customer_id AS customer_id,\n        cm.`name` AS customer_name,\n        cp.end_customer_id,\n        ecm.`name` AS end_customer_name,\n        cc.contract_id AS contract_id,\n        cp.project_code AS project_code,\n        cp.pm_account AS adm_account,\n        acc.`name` AS adm_name\n        FROM cip.cip_customer cm\n        LEFT JOIN cip.cip_contract cc ON cc.customer_id = cm.customer_id\n        LEFT JOIN cip.cip_project cp ON cp.contract_id = cc.contract_id\n        LEFT JOIN cip.cip_customer ecm ON cp.end_customer_id = ecm.customer_id\n        LEFT JOIN sms.account acc ON cp.pm_account = acc.account\n        WHERE cp.status = 0\n        AND cp.pm_account IS NOT NULL\n        <if test=\"(customerIds != null and customerIds.size() > 0) or (endCustomerIds != null and endCustomerIds.size() > 0)\">\n            AND (\n            <trim prefixOverrides=\"OR\">\n                <if test=\"customerIds != null and customerIds.size() > 0\">\n                    OR cc.customer_id IN\n                    <foreach collection=\"customerIds\" item=\"customerId\" open=\"(\" close=\")\" separator=\",\">\n                        #{customerId}\n                    </foreach>\n                </if>\n                <if test=\"endCustomerIds != null and endCustomerIds.size() > 0\">\n                    OR cp.end_customer_id IN\n                    <foreach collection=\"endCustomerIds\" item=\"customerId\" open=\"(\" close=\")\" separator=\",\">\n                        #{customerId}\n                    </foreach>\n                </if>\n            </trim>\n            \n        </if>\n            AND EXISTS (\n            SELECT 1\n            FROM cbms.sys_cabinet sc\n            WHERE sc.project_code = cp.project_code\n            AND sc.elec_status = 1\n            AND sc.`status` = 1\n           <if test=\"cabinetIds != null and cabinetIds.size() > 0\">\n             AND sc.cabinet_id IN\n             <foreach collection=\"cabinetIds\" item=\"cabinetId\" open=\"(\" close=\")\" separator=\",\">\n                #{cabinetId}\n             </foreach>\n           </if>\n            \n        </select>\n\n    <select id=\"findCustomerImpactADMsByRoomOrLocation\" resultType=\"com.gds.jpi.dcim.vo.CustomerImpactAdmVO\"\n            parameterType=\"com.gds.jpi.dcim.dto.CustomerImpactContactDTO\">\n        SELECT DISTINCT\n        cm.customer_id AS customer_id,\n        cm.`name` AS customer_name,\n        cp.end_customer_id,\n        ecm.`name` AS end_customer_name,\n        cc.contract_id AS contract_id,\n        cp.project_code AS project_code,\n        cp.pm_account AS adm_account,\n        acc.`name` AS adm_name\n        FROM cip.cip_customer cm\n        LEFT JOIN cip.cip_contract cc ON cc.customer_id = cm.customer_id\n        LEFT JOIN cip.cip_project cp ON cp.contract_id = cc.contract_id\n        LEFT JOIN cip.cip_customer ecm ON cp.end_customer_id = ecm.customer_id\n        LEFT JOIN sms.account acc ON cp.pm_account = acc.account\n        WHERE cp.status = 0\n        AND cp.pm_account IS NOT NULL\n        <if test=\"(customerIds != null and customerIds.size() > 0) or (endCustomerIds != null and endCustomerIds.size() > 0)\">\n            AND (\n            <trim prefixOverrides=\"OR\">\n                <if test=\"customerIds != null and customerIds.size() > 0\">\n                    OR cc.customer_id IN\n                    <foreach collection=\"customerIds\" item=\"customerId\" open=\"(\" close=\")\" separator=\",\">\n                        #{customerId}\n                    </foreach>\n                </if>\n                <if test=\"endCustomerIds != null and endCustomerIds.size() > 0\">\n                    OR cp.end_customer_id IN\n                    <foreach collection=\"endCustomerIds\" item=\"customerId\" open=\"(\" close=\")\" separator=\",\">\n                        #{customerId}\n                    </foreach>\n                </if>\n            </trim>\n            \n        </if>\n            AND EXISTS (\n            SELECT 1\n            FROM dcrm.rel_project_room pr\n            LEFT JOIN geo.room r ON pr.room_location_id = r.location_id\n            WHERE pr.project_code = cp.project_code\n            AND pr.is_released = 0\n           <!-- <if test = \"locationIds != null and locationIds.size()>0\">\n                  AND pr.room_location_id IN\n                  <foreach collection=\"locationIds\" item=\"locationId\" open=\"(\" close=\")\" separator=\",\">\n                      #{locationId}\n                  </foreach>\n            </if>-->\n            <if test=\"roomIds != null and roomIds.size() > 0\">\n                AND r.id IN\n                <foreach collection=\"roomIds\" item=\"roomId\" open=\"(\" close=\")\" separator=\",\">\n                    #{roomId}\n                </foreach>\n            </if>\n            \n        </select>\n\n    <select id=\"findCustomerImpactADMsByDc\" resultType=\"com.gds.jpi.dcim.vo.CustomerImpactAdmVO\"\n            parameterType=\"com.gds.jpi.dcim.dto.CustomerImpactContactDTO\">\n        SELECT DISTINCT\n        cm.customer_id AS customer_id,\n        cm.`name` AS customer_name,\n        cp.end_customer_id,\n        ecm.`name` AS end_customer_name,\n        cc.contract_id AS contract_id,\n        cp.project_code AS project_code,\n        cp.pm_account AS adm_account,\n        acc.`name` AS adm_name\n        FROM cip.cip_customer cm\n        LEFT JOIN cip.cip_contract cc ON cc.customer_id = cm.customer_id\n        LEFT JOIN cip.cip_project cp ON cp.contract_id = cc.contract_id\n        LEFT JOIN cip.cip_customer ecm ON cp.end_customer_id = ecm.customer_id\n        LEFT JOIN sms.account acc ON cp.pm_account = acc.account\n        WHERE cp.status = 0\n        AND cp.pm_account IS NOT NULL\n        <if test=\"(customerIds != null and customerIds.size() > 0) or (endCustomerIds != null and endCustomerIds.size() > 0)\">\n            AND (\n            <trim prefixOverrides=\"OR\">\n                <if test=\"customerIds != null and customerIds.size() > 0\">\n                    OR cc.customer_id IN\n                    <foreach collection=\"customerIds\" item=\"customerId\" open=\"(\" close=\")\" separator=\",\">\n                        #{customerId}\n                    </foreach>\n                </if>\n                <if test=\"endCustomerIds != null and endCustomerIds.size() > 0\">\n                    OR cp.end_customer_id IN\n                    <foreach collection=\"endCustomerIds\" item=\"customerId\" open=\"(\" close=\")\" separator=\",\">\n                        #{customerId}\n                    </foreach>\n                </if>\n            </trim>\n            \n        </if>\n            AND EXISTS (\n            SELECT 1\n            FROM dcrm.rel_project_dc pd\n            WHERE pd.project_code = cp.project_code\n            AND pd.is_released = 0\n            <if test=\"dcIds != null and dcIds.size() > 0\">\n             AND pd.dc_id IN\n              <foreach collection=\"dcIds\" item=\"dcId\" open=\"(\" close=\")\" separator=\",\">\n                #{dcId}\n              </foreach>\n            </if>\n            \n        </select>\n</mapper>",
+  "details": [
+    {
+      "lineNumber": 4,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "查询数据中心影响客户",
+      "translatedText": "Query data center impact customers"
+    },
+    {
+      "lineNumber": 54,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "查询位置影响客户",
+      "translatedText": "Query location impact customers"
+    },
+    {
+      "lineNumber": 104,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "查询机柜影响",
+      "translatedText": "Query cabinet impact"
+    },
+    {
+      "lineNumber": 157,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "查询影响客户的ADM联系人（通过项目维度进行影响分析）",
+      "translatedText": "Query impact customer's ADM contacts (impact analysis through project dimension)"
+    },
+    {
+      "lineNumber": 160,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "甲方&最终用户",
+      "translatedText": "Party A & Final User"
+    },
+    {
+      "lineNumber": 173,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "最终用户",
+      "translatedText": "Final User"
+    },
+    {
+      "lineNumber": 222,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "甲方&最终用户",
+      "translatedText": "Party A & Final User"
+    },
+    {
+      "lineNumber": 235,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "最终用户",
+      "translatedText": "Final User"
+    },
+    {
+      "lineNumber": 284,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "甲方&最终用户",
+      "translatedText": "Party A & Final User"
+    },
+    {
+      "lineNumber": 297,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "最终用户",
+      "translatedText": "Final User"
+    },
+    {
+      "lineNumber": 346,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "甲方&最终用户",
+      "translatedText": "Party A & Final User"
+    },
+    {
+      "lineNumber": 359,
+      "lineType": "comment",
+      "jobType": "Text Translation",
+      "originalText": "最终用户",
+      "translatedText": "Final User"
+    }
+  ]
+}
+```
