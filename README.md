@@ -12,7 +12,7 @@
 - BACKEND
   - HZERO
 - FRONTEND
-  - [https://hive-bridge.miauuu.tech/](https://hive-bridge.javanesia.tech/)
+  - https://hive-bridge.javanesia.tech
     - NEXT JS (_TEMPORARY FOR DEVELOPMENT_)
 
 ## TODO
@@ -49,5 +49,5 @@
     - Add prompt condition — e.g. ` Ensure the line numbers in "details" align exactly with the original input file (do not add new line). Do not include markdown formatting (e.g., ```json) in the response. Return the JSON as plain text. `
     - Sanitized the string
 
-- Cannot connect to https://hive-bridge.javanesia.tech/ while using Forticlient VPN
+- Cannot connect to https://hive-bridge.javanesia.tech while using Forticlient VPN
   - Change ur browser DNS to a custom one (Cloudflare 1.1.1.1 works)
